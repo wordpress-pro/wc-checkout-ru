@@ -1,0 +1,37 @@
+<?php
+/*
+Plugin Name: J@W WooCommerce CheckOut.ru
+Plugin URI: http://
+Description: Checkout.ru shipping plugin for WooCommerce
+Author: pshentsoff
+Author URI: http://pshentsoff.ru/
+Version: 0.0.0
+Text Domain: jaw-wc-checkout-ru
+License: GPL version 3 or later - http://www.gnu.org/licenses/gpl-3.0.html
+*/
+/**
+ * @file        jaw-wc-checkout-ru.php
+ * @description Checkout.ru shipping plugin for WooCommerce
+ *
+ * PHP Version  5.4.4
+ *
+ * @package     Wordpress.local
+ * @category
+ * @plugin URI
+ * @copyright   2014, Vadim Pshentsov. All Rights Reserved.
+ * @license     http://www.gnu.org/licenses/gpl-3.0.html GNU/GPLv3
+ * @author      Vadim Pshentsov <pshentsoff@gmail.com> 
+ * @link        http://pshentsoff.ru Author's homepage
+ * @link        http://blog.pshentsoff.ru Author's blog
+ *
+ * @created     19.10.14
+ */
+
+// Exit if accessed directly
+defined('ABSPATH') or exit;
+
+if ( ! class_exists( 'JAW_WC_Checkout_Ru' ) ) {
+  class JAW_WC_Checkout_Ru {
+
+  }
+}
