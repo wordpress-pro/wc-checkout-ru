@@ -1,4 +1,4 @@
-## J@W WC Checkout.Ru
+## J@W WooCommerce Checkout.Ru
 
 CheckOut.ru plugin for WooCommerce
 
