@@ -46,24 +46,40 @@ function jaw_wc_checkout_ru_init() {
 
       function __construct() {
         $this->id = 'checkout_ru';
+
         load_plugin_textdomain($this->id, false, plugin_basename(__FILE__).'/languages');
 
         $this->method_title = __('Checkout.ru Shipping', $this->id);
 
-        $this->shipping_init();
+        $this->init();
       }
 
       /**
        * Init settings
        */
-      function shipping_init() {
+      function init() {
+
         setlocale(LC_ALL, get_locale());
+
+        $this->init_form_fields();
+        $this->init_settings();
+
+        // Define user set variables
+        $this->title        = $this->get_option( 'title' );
+        $this->type         = $this->get_option( 'type' );
+        $this->fee          = $this->get_option( 'fee' );
+        $this->type         = $this->get_option( 'type' );
+        $this->codes        = $this->get_option( 'codes' );
+        $this->availability = $this->get_option( 'availability' );
+        $this->countries    = $this->get_option( 'countries' );
+
+        add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
       }
 
       /**
        * The Shipping fields
        */
-      function init_form_settings() {
+      function init_form_fields() {
         $this->form_fields = array(
           'enabled' => array(
             'title' => __('Enable', 'woocommerce'),
@@ -71,23 +87,42 @@ function jaw_wc_checkout_ru_init() {
             'label' => __('Enable Checkout.ru', $this->id),
             'default' => 'no',
           ),
+          //@todo add other settings
         );
       }
 
+      /**
+       * Calculate shipping function.
+       */
+      function calculate_shipping() {
+        //@todo calc shipping cost
+        $shipping_total = 0;
+
+        $rate = array(
+          'id'    => $this->id,
+          'label' => $this->title,
+          'cost'  => $shipping_total
+        );
+
+        $this->add_rate($rate);
+
+      }
+
+      /**
+       * admin_options function. Simplest.
+       *
+       * @access public
+       * @return void
+       */
       function admin_options() {
-        global $woocommerce, $wpdb;
-        //@todo Change to native WP options statements
-        $field = $this->plugin_id.$this->id.'_';
-        $shipping_details = $wpdb->get_results("SELECT `option_value` FROM `wp_options` WHERE `option_name`='".$field."settings'");
-        $default_values = unserialize($shipping_details[0]->option_value);
+        ?>
+        <h3><?php echo $this->method_title; ?></h3>
+        <p><?php _e( 'Checkout.ru shipping for delivering orders by CheckOut service.', $this->id ); ?></p>
+        <table class="form-table">
+          <?php $this->generate_settings_html(); ?>
+        </table> <?php
       }
 
-      function process_admin_options() {
-        global$wpdb;
-
-        //@todo save admin options (update_option)
-
-      }
     }
   }
 }
