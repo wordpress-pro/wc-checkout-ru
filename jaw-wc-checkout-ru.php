@@ -45,7 +45,7 @@ function jaw_wc_checkout_ru_init() {
       function __construct() {
         $this->id = 'checkout_ru';
 
-        $text_domain = load_plugin_textdomain($this::TEXT_DOMAIN, false, plugin_basename(__DIR__).'/languages');
+        load_plugin_textdomain($this::TEXT_DOMAIN, false, plugin_basename(__DIR__).'/languages');
 
         $this->method_title = __('Checkout.ru Shipping', $this::TEXT_DOMAIN);
 
@@ -64,12 +64,12 @@ function jaw_wc_checkout_ru_init() {
 
         // Define user set variables
         $this->title        = $this->get_option( 'title' );
-        $this->type         = $this->get_option( 'type' );
-        $this->fee          = $this->get_option( 'fee' );
-        $this->type         = $this->get_option( 'type' );
-        $this->codes        = $this->get_option( 'codes' );
-        $this->availability = $this->get_option( 'availability' );
-        $this->countries    = $this->get_option( 'countries' );
+//        $this->type         = $this->get_option( 'type' );
+//        $this->fee          = $this->get_option( 'fee' );
+//        $this->type         = $this->get_option( 'type' );
+//        $this->codes        = $this->get_option( 'codes' );
+//        $this->availability = $this->get_option( 'availability' );
+//        $this->countries    = $this->get_option( 'countries' );
 
         add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
       }
@@ -84,6 +84,13 @@ function jaw_wc_checkout_ru_init() {
             'type' => 'checkbox',
             'label' => __('Enable Checkout.ru', $this::TEXT_DOMAIN),
             'default' => 'no',
+          ),
+          'title' => array(
+            'title'       => __( 'Title', 'woocommerce' ),
+            'type'        => 'text',
+            'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
+            'default'     => __( 'CheckOut Delivery', $this::TEXT_DOMAIN ),
+            'desc_tip'    => true,
           ),
           //@todo add other settings
         );

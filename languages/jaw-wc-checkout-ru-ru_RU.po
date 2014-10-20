@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: JAW-WC-Checkout-Ru\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-10-20 16:18+0500\n"
-"PO-Revision-Date: 2014-10-20 17:06+0500\n"
+"POT-Creation-Date: 2014-10-20 18:01+0500\n"
+"PO-Revision-Date: 2014-10-20 18:03+0500\n"
 "Last-Translator: Vadim Pshentsov <pshentsoff@yandex.ru>\n"
 "Language-Team: J@W Team <pshentsoff@yandex.ru>\n"
 "Language: \n"
@@ -28,7 +28,20 @@ msgstr "Включить"
 msgid "Enable Checkout.ru"
 msgstr "Включить Checkout.ru"
 
-#: ../jaw-wc-checkout-ru.php:118
+#: ../jaw-wc-checkout-ru.php:89
+#, fuzzy
+msgid "Title"
+msgstr "Заголовок"
+
+#: ../jaw-wc-checkout-ru.php:91
+msgid "This controls the title which the user sees during checkout."
+msgstr "Заголовок, который увидит пользователь во время заказа."
+
+#: ../jaw-wc-checkout-ru.php:92
+msgid "CheckOut Delivery"
+msgstr "Доставка CheckOut"
+
+#: ../jaw-wc-checkout-ru.php:125
 msgid "Checkout.ru shipping for delivering orders by CheckOut service."
 msgstr "Доставка заказов сервисом CheckOut."
 
