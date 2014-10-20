@@ -30,56 +30,66 @@ License: GPL version 3 or later - http://www.gnu.org/licenses/gpl-3.0.html
 // Exit if accessed directly
 defined('ABSPATH') or exit;
 
-if ( ! class_exists( 'JAW_WC_Checkout_Ru' ) ) {
-  class JAW_WC_Checkout_Ru extends WC_Shipping_Method {
-    /**
-     * Plugin version
-     * @var string
-     */
-    const VERSION = '0.0.1';
+add_action('plugins_loaded', 'jaw_wc_checkout_ru_init', 0);
+function jaw_wc_checkout_ru_init() {
 
-    function __construct() {
-      $this->id = 'checkout_ru';
-      load_plugin_textdomain($this->id, false, plugin_basename(__FILE__).'/languages');
+  if(!class_exists('WC_Shipping_Method')) return;
 
-      $this->method_title = __('Checkout.ru Shipping', $this->id);
+  if (!class_exists('JAW_WC_Checkout_Ru')) {
 
-      $this->shipping_init();
-    }
+    class JAW_WC_Checkout_Ru extends WC_Shipping_Method {
+      /**
+       * Plugin version
+       * @var string
+       */
+      const VERSION = '0.0.1';
 
-    /**
-     * Init settings
-     */
-    function shipping_init() {
-      setlocale(LC_ALL, get_locale());
-    }
+      function __construct() {
+        $this->id = 'checkout_ru';
+        load_plugin_textdomain($this->id, false, plugin_basename(__FILE__).'/languages');
 
-    /**
-     * The Shipping fields
-     */
-    function init_form_settings() {
-      $this->form_fields = array(
-        'enabled' => array(
-          'title' => __('Enable', 'woocommerce'),
-          'type' => 'checkbox',
-          'label' => __('Enable Checkout.ru', $this->id),
-          'default' => 'no',
-        ),
-      );
-    }
+        $this->method_title = __('Checkout.ru Shipping', $this->id);
 
-    function admin_options() {
-      global $woocommerce, $wpdb;
-      $field = $this->plugin_id.$this->id.'_';
-      $shipping_details = $wpdb->get_results("SELECT `option_value` FROM `wp_options` WHERE `option_name`='".$field."settings'");
-      $default_values = unserialize($shipping_details[0]->option_value);
-    }
+        $this->shipping_init();
+      }
 
-    function process_admin_options() {
-      global$wpdb;
+      /**
+       * Init settings
+       */
+      function shipping_init() {
+        setlocale(LC_ALL, get_locale());
+      }
 
-      //@todo save admin options
-      
+      /**
+       * The Shipping fields
+       */
+      function init_form_settings() {
+        $this->form_fields = array(
+          'enabled' => array(
+            'title' => __('Enable', 'woocommerce'),
+            'type' => 'checkbox',
+            'label' => __('Enable Checkout.ru', $this->id),
+            'default' => 'no',
+          ),
+        );
+      }
+
+      function admin_options() {
+        global $woocommerce, $wpdb;
+        //@todo Change to native WP options statements
+        $field = $this->plugin_id.$this->id.'_';
+        $shipping_details = $wpdb->get_results("SELECT `option_value` FROM `wp_options` WHERE `option_name`='".$field."settings'");
+        $default_values = unserialize($shipping_details[0]->option_value);
+      }
+
+      function process_admin_options() {
+        global$wpdb;
+
+        //@todo save admin options (update_option)
+
+      }
     }
   }
+
+  
 }
