@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: J@W WooCommerce CheckOut.ru
-Plugin URI: http://
+Plugin URI: https://bitbucket.org/jaw_projects/jaw-wc-checkout-ru
 Description: Checkout.ru shipping plugin for WooCommerce
 Author: pshentsoff
 Author URI: http://pshentsoff.ru/
@@ -37,19 +37,17 @@ function jaw_wc_checkout_ru_init() {
   if (!class_exists('JAW_WC_Checkout_Ru')) {
 
     class JAW_WC_Checkout_Ru extends WC_Shipping_Method {
-      /**
-       * Plugin version
-       * @var string
-       */
+
       const VERSION = '0.0.1';
       const METHOD = 'JAW_WC_Checkout_Ru';
+      const TEXT_DOMAIN = 'jaw-wc-checkout-ru';
 
       function __construct() {
         $this->id = 'checkout_ru';
 
-        load_plugin_textdomain($this->id, false, plugin_basename(__FILE__).'/languages');
+        $text_domain = load_plugin_textdomain($this::TEXT_DOMAIN, false, plugin_basename(__DIR__).'/languages');
 
-        $this->method_title = __('Checkout.ru Shipping', $this->id);
+        $this->method_title = __('Checkout.ru Shipping', $this::TEXT_DOMAIN);
 
         $this->init();
       }
@@ -84,7 +82,7 @@ function jaw_wc_checkout_ru_init() {
           'enabled' => array(
             'title' => __('Enable', 'woocommerce'),
             'type' => 'checkbox',
-            'label' => __('Enable Checkout.ru', $this->id),
+            'label' => __('Enable Checkout.ru', $this::TEXT_DOMAIN),
             'default' => 'no',
           ),
           //@todo add other settings
@@ -117,7 +115,7 @@ function jaw_wc_checkout_ru_init() {
       function admin_options() {
         ?>
         <h3><?php echo $this->method_title; ?></h3>
-        <p><?php _e( 'Checkout.ru shipping for delivering orders by CheckOut service.', $this->id ); ?></p>
+        <p><?php _e( 'Checkout.ru shipping for delivering orders by CheckOut service.', $this::TEXT_DOMAIN ); ?></p>
         <table class="form-table">
           <?php $this->generate_settings_html(); ?>
         </table> <?php
