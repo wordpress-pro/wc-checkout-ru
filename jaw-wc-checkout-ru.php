@@ -42,6 +42,7 @@ function jaw_wc_checkout_ru_init() {
        * @var string
        */
       const VERSION = '0.0.1';
+      const METHOD = 'JAW_WC_Checkout_Ru';
 
       function __construct() {
         $this->id = 'checkout_ru';
@@ -90,12 +91,34 @@ function jaw_wc_checkout_ru_init() {
     }
   }
 }
-
 add_action('woocommerce_shipping_init', 'jaw_wc_checkout_ru_init', 0);
 
+/**
+ * woocommerce_shipping_methods hook function
+ * @param $methods
+ * @return array
+ */
 function jaw_wc_checkout_ru_add_method($methods) {
-  $methods[] = 'JAW_WC_Checkout_Ru';
+  $methods[] = JAW_WC_Checkout_Ru::METHOD;
   return $methods;
 }
-
 add_filter('woocommerce_shipping_methods', 'jaw_wc_checkout_ru_add_method');
+
+/**
+ * woocommerce_cart_totals_before_order_total hook function
+ */
+function jaw_wc_checkout_ru_costs() {
+
+  $wc = WC();
+
+  if($wc->session->choosen_shipping_methods[0] == JAW_WC_Checkout_Ru::METHOD) {
+    //@todo check this and set
+//    $wc->shipping->shipping_total = $_SESSION['price'];
+//    $wc->cart->total = $wc->cart->subtotal + $_SESSION['price'];
+//    $wc->session->shipping_total = '10';
+//    $wc->session->total = $wc->session->subtotal + $_SESSION['price'];
+//    $wc->cart->add_fee(__('Shipping Cost', 'woocommerce'), $_SESSION['price']);
+//    $wc->session->set('shipping_total"', $_SESSION['price']);
+  }
+}
+add_filter('woocommerce_cart_totals_before_order_total', 'jaw_wc_checkout_ru_costs');
