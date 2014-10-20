@@ -30,7 +30,6 @@ License: GPL version 3 or later - http://www.gnu.org/licenses/gpl-3.0.html
 // Exit if accessed directly
 defined('ABSPATH') or exit;
 
-add_action('plugins_loaded', 'jaw_wc_checkout_ru_init', 0);
 function jaw_wc_checkout_ru_init() {
 
   if(!class_exists('WC_Shipping_Method')) return;
@@ -90,6 +89,13 @@ function jaw_wc_checkout_ru_init() {
       }
     }
   }
-
-  
 }
+
+add_action('woocommerce_shipping_init', 'jaw_wc_checkout_ru_init', 0);
+
+function jaw_wc_checkout_ru_add_method($methods) {
+  $methods[] = 'JAW_WC_Checkout_Ru';
+  return $methods;
+}
+
+add_filter('woocommerce_shipping_methods', 'jaw_wc_checkout_ru_add_method');
