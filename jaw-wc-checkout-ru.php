@@ -43,7 +43,28 @@ function jaw_wc_checkout_ru_init() {
       const TEXT_DOMAIN = 'jaw-wc-checkout-ru';
       const TICKET_URL = 'http://platform.checkout.ru/service/login/ticket/';
 
+      /**
+       * @var string CheckOut service API key
+       */
       public $api_key = '';
+      /**
+       * @var JAW_WC_Checkout_Ru The single instance of the class
+       */
+      protected static $_instance = null;
+
+      /**
+       * Main JAW_WC_Checkout_Ru Instance
+       *
+       * Ensures only one instance of JAW_WC_Checkout_Ru is loaded or can be loaded.
+       *
+       * @static
+       * @return JAW_WC_Checkout_Ru Main instance
+       */
+      public static function instance() {
+        if ( is_null( self::$_instance ) )
+          self::$_instance = new self();
+        return self::$_instance;
+      }
 
       function __construct() {
         $this->id = 'checkout_ru';
@@ -53,6 +74,8 @@ function jaw_wc_checkout_ru_init() {
         $this->method_title = __('Checkout.ru Shipping', $this::TEXT_DOMAIN);
 
         $this->init();
+
+
       }
 
       /**
@@ -67,7 +90,7 @@ function jaw_wc_checkout_ru_init() {
 
         // Define user set variables
         $this->title = $this->get_option( 'title' );
-        $this->api_key = $this->get_option('API key');
+        $this->api_key = $this->get_option('api_key');
 //        $this->type         = $this->get_option( 'type' );
 //        $this->fee          = $this->get_option( 'fee' );
 //        $this->type         = $this->get_option( 'type' );
@@ -76,6 +99,7 @@ function jaw_wc_checkout_ru_init() {
 //        $this->countries    = $this->get_option( 'countries' );
 
         add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
+//        add_filter('woocommerce_checkout_fields', array($this, 'checkout_ru_fields'));
       }
 
       /**
@@ -96,10 +120,13 @@ function jaw_wc_checkout_ru_init() {
             'default'     => __( 'CheckOut Delivery', $this::TEXT_DOMAIN ),
             'desc_tip'    => true,
           ),
-          'API key' => array(
+          'api_key' => array(
             'title' => __('API key', $this::TEXT_DOMAIN),
             'type' => 'text',
             'label' => __('CheckOut service API key', $this::TEXT_DOMAIN),
+            'default' => __('ENTER API KEY HERE', $this::TEXT_DOMAIN),
+            'description' => __('Get your API key to CheckOut service functions at service clients private area.'),
+            'desc_tip'    => true,
           ),
 
           //@todo add other settings
@@ -168,18 +195,39 @@ function jaw_wc_checkout_ru_init() {
         curl_setopt($tuCurl, CURLOPT_RETURNTRANSFER, 1);
         $tuData = curl_exec($tuCurl);
 
-        if(!curl_errno($tuCurl)){
-          $info = curl_getinfo($tuCurl);
-        } else {
+        if(curl_errno($tuCurl)){
           echo 'Curl error: ' . curl_error($tuCurl);
           return false;
         }
 
         curl_close($tuCurl);
         $response = json_decode($tuData,true);
+
         return $response["ticket"];
 
       }
+
+//      /**
+//       * 'woocommerce_checkout_fields' hook function
+//       * @param $checkout_fields
+//       * @return mixed
+//       */
+//      function checkout_ru_fields($checkout_fields) {
+//
+//        $checkout_fields['checkout_ru'] = array(
+//          // Try it on hidden (may be at session?)
+//          'ticket' => array(
+//            'type' => 'hidden',
+//            'default' => $this->get_session_ticket(),
+//          ),
+//
+//        );
+//
+//        echo '<pre>'.print_r($checkout_fields, true).'</pre>';
+//
+//        return $checkout_fields;
+//
+//      }
 
     }
   }
@@ -501,3 +549,26 @@ function jaw_wc_checkout_ru_form_field( $key, $args, $value = null ) {
 
   if ( $args['return'] ) return $field; else echo $field;
 }
+
+/**
+ * 'woocommerce_checkout_fields' hook function
+ * @param $checkout_fields
+ * @return mixed
+ */
+function jaw_wc_checkout_ru_fields($checkout_fields) {
+
+  $checkout_ru = JAW_WC_Checkout_Ru::instance();
+
+  $checkout_fields['checkout_ru'] = array(
+    // Try it on hidden (may be at session?)
+    'ticket' => array(
+      'type' => 'hidden',
+      'default' => $checkout_ru->get_session_ticket(),
+    ),
+
+  );
+
+  return $checkout_fields;
+
+}
+add_filter('woocommerce_checkout_fields', 'jaw_wc_checkout_ru_fields');
