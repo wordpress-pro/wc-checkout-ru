@@ -41,6 +41,9 @@ function jaw_wc_checkout_ru_init() {
       const VERSION = '0.0.1';
       const METHOD = 'JAW_WC_Checkout_Ru';
       const TEXT_DOMAIN = 'jaw-wc-checkout-ru';
+      const TICKET_URL = 'http://platform.checkout.ru/service/login/ticket/';
+
+      public $api_key = '';
 
       function __construct() {
         $this->id = 'checkout_ru';
@@ -63,7 +66,8 @@ function jaw_wc_checkout_ru_init() {
         $this->init_settings();
 
         // Define user set variables
-        $this->title        = $this->get_option( 'title' );
+        $this->title = $this->get_option( 'title' );
+        $this->api_key = $this->get_option('API key');
 //        $this->type         = $this->get_option( 'type' );
 //        $this->fee          = $this->get_option( 'fee' );
 //        $this->type         = $this->get_option( 'type' );
@@ -92,7 +96,11 @@ function jaw_wc_checkout_ru_init() {
             'default'     => __( 'CheckOut Delivery', $this::TEXT_DOMAIN ),
             'desc_tip'    => true,
           ),
-          //@todo add setting that allow replace standard WC checkout template with Checkout.ru template (default = 'yes')
+          'API key' => array(
+            'title' => __('API key', $this::TEXT_DOMAIN),
+            'type' => 'text',
+            'label' => __('CheckOut service API key', $this::TEXT_DOMAIN),
+          ),
 
           //@todo add other settings
 
@@ -143,6 +151,36 @@ function jaw_wc_checkout_ru_init() {
         return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', true, $package );
 
       }
+
+      /**
+       * Get CheckOut service session ticket
+       * @return string session ticket or false on error or API key not set
+       */
+      function get_session_ticket() {
+
+        // CheckOut service API key must be set (at settings on admin options page)
+        if(!isset($this->api_key) || empty($this->api_key)) return false;
+
+        $tuCurl = curl_init();
+        curl_setopt($tuCurl, CURLOPT_URL, $this::TICKET_URL . $this->api_key);
+        curl_setopt($tuCurl, CURLOPT_VERBOSE, 0);
+        curl_setopt($tuCurl, CURLOPT_HEADER, 0);
+        curl_setopt($tuCurl, CURLOPT_RETURNTRANSFER, 1);
+        $tuData = curl_exec($tuCurl);
+
+        if(!curl_errno($tuCurl)){
+          $info = curl_getinfo($tuCurl);
+        } else {
+          echo 'Curl error: ' . curl_error($tuCurl);
+          return false;
+        }
+
+        curl_close($tuCurl);
+        $response = json_decode($tuData,true);
+        return $response["ticket"];
+
+      }
+
     }
   }
 }
