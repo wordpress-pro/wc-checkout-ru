@@ -1,14 +1,23 @@
 <?php
-/*
-Plugin Name: J@W WooCommerce CheckOut.ru
-Plugin URI: https://bitbucket.org/jaw_projects/jaw-wc-checkout-ru
-Description: Checkout.ru shipping plugin for WooCommerce
-Author: pshentsoff
-Author URI: http://pshentsoff.ru/
-Version: 0.0.3
-Text Domain: jaw-wc-checkout-ru
-License: GPL version 3 or later - http://www.gnu.org/licenses/gpl-3.0.html
-*/
+/**
+ * Plugin Name: JAW WooCommerce CheckOut.ru
+ * Plugin URI: https://bitbucket.org/jaw_projects/jaw-wc-checkout-ru
+ * Description: Checkout.ru shipping plugin for WooCommerce
+ * Version: 0.0.3
+ * Author: pshentsoff
+ * Author URI: http://pshentsoff.ru/
+ * Requires at least: 3.8
+ * Tested up to: 4.0
+ *
+ * Text Domain: jaw-wc-checkout-ru
+ * Domain Path: /languages/
+ *
+ * License: GPL version 3 or later - http://www.gnu.org/licenses/gpl-3.0.html
+ *
+ * @package WooCommerce
+ * @category Add-on
+ * @author pshentsoff
+ */
 /**
  * @file        jaw-wc-checkout-ru.php
  * @description Checkout.ru shipping plugin for WooCommerce
@@ -40,9 +49,12 @@ function jaw_wc_checkout_ru_init() {
     const METHOD = 'JAW_WC_Checkout_Ru';
     const TEXT_DOMAIN = 'jaw-wc-checkout-ru';
     /**
-     *
+     * URL to get session ticket
      */
     const TICKET_URL = 'http://platform.checkout.ru/service/login/ticket/';
+    /**
+     * URL of CO3 popup script
+     */
     const COP_SCRIPT_URL = 'http://platform.checkout.ru/cop/popup.js';
 
     /**
