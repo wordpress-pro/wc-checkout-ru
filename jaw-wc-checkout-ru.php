@@ -51,6 +51,10 @@ function jaw_wc_checkout_ru_init() {
        * @var JAW_WC_Checkout_Ru The single instance of the class
        */
       protected static $_instance = null;
+      /**
+       * @var boolean Udse CheckOut popup for checkout
+       */
+      public $use_cop;
 
       /**
        * Main JAW_WC_Checkout_Ru Instance
@@ -91,6 +95,8 @@ function jaw_wc_checkout_ru_init() {
         // Define user set variables
         $this->title = $this->get_option( 'title' );
         $this->api_key = $this->get_option('api_key');
+        $this->use_cop = $this->get_option('use_cop', true);
+
 //        $this->type         = $this->get_option( 'type' );
 //        $this->fee          = $this->get_option( 'fee' );
 //        $this->type         = $this->get_option( 'type' );
@@ -129,6 +135,13 @@ function jaw_wc_checkout_ru_init() {
             'default' => __('ENTER API KEY HERE', $this::TEXT_DOMAIN),
             'description' => __('Get your API key to CheckOut service functions at service clients private area.'),
             'desc_tip'    => true,
+          ),
+          'use_cop' => array(
+            'title' => __('Use CheckOut.ru popup', $this::TEXT_DOMAIN),
+            'type' => 'checkbox',
+            'description' => __('Use CheckOut.ru popup form for checkout instead of native WooCommerce.'),
+            'desc_tip'    => true,
+            'default' => 'on',
           ),
 
           //@todo add other settings
@@ -182,7 +195,7 @@ function jaw_wc_checkout_ru_init() {
       }
 
       /**
-       * Get CheckOut service session ticket
+       * Get CheckOut service session ticket from service or cookie
        * @return string session ticket or false on error or API key not set
        */
       function get_session_ticket() {
@@ -213,33 +226,10 @@ function jaw_wc_checkout_ru_init() {
 
           return $response['ticket'];
         } else {
-          //@todo check if ticket is expired and refresh if need
           return $_COOKIE['jaw_wc_checkout_ru_ticket'];
         }
 
       }
-
-//      /**
-//       * 'woocommerce_checkout_fields' hook function
-//       * @param $checkout_fields
-//       * @return mixed
-//       */
-//      function checkout_ru_fields($checkout_fields) {
-//
-//        $checkout_fields['checkout_ru'] = array(
-//          // Try it on hidden (may be at session?)
-//          'ticket' => array(
-//            'type' => 'hidden',
-//            'default' => $this->get_session_ticket(),
-//          ),
-//
-//        );
-//
-//        echo '<pre>'.print_r($checkout_fields, true).'</pre>';
-//
-//        return $checkout_fields;
-//
-//      }
 
     }
   }
@@ -293,7 +283,20 @@ add_filter('wc_get_template', 'jaw_wc_checkout_ru_get_template', 0, 3);
  * wp_enqueue_scripts hook function
  */
 function jaw_wc_checkout_ru_enqueue_script() {
-  wp_enqueue_script('jaw-wc-checkout-ru-js', plugins_url('assets/js/checkout.js', __FILE__, array('jquery')));
+
+  $checkout_ru = JAW_WC_Checkout_ru::instance();
+
+  if($checkout_ru->use_cop) {
+    wp_enqueue_script('jaw-wc-checkout-ru--cop', 'http://platform.checkout.ru/cop/popup.js?ver=1.0');
+  } else {
+    //@todo without CO3?
+//  wp_enqueue_script('jaw-wc-checkout-ru-js-checkout', plugins_url('assets/js/checkout.js', __FILE__), array('jquery', 'wc-checkout', 'woocommerce'));
+//  wp_enqueue_script('jaw-wc-checkout-ru-js-checkout-billing', plugins_url('assets/js/checkout-billing.js', __FILE__), array('jaw-wc-checkout-ru-js-checkout', 'wc-checkout', 'woocommerce'));
+//  if(!WC()->cart->ship_to_billing_address_only()) {
+//    wp_enqueue_script('jaw-wc-checkout-ru-js-checkout-shipping', plugins_url('assets/js/checkout-shipping.js', __FILE__), array('jaw-wc-checkout-ru-js-checkout'));
+//  }
+  }
+
 }
 add_filter('wp_enqueue_scripts', 'jaw_wc_checkout_ru_enqueue_script');
 
@@ -570,6 +573,7 @@ function jaw_wc_checkout_ru_form_field( $key, $args, $value = null ) {
  */
 function jaw_wc_checkout_ru_fields($checkout_fields) {
 
+  $wc = WC();
   $checkout_ru = JAW_WC_Checkout_Ru::instance();
 
   $checkout_fields['checkout_ru'] = array(

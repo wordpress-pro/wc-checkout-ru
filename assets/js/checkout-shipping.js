@@ -1,6 +1,6 @@
 /**
  * Javascript source file
- * @file        checkout.js
+ * @file        checkout-shipping.js
  * @description
  *
  * @package     Wordpress.local
@@ -13,11 +13,3 @@
  *
  * @created     22.10.14
  */
-
-function changing_city() {
-    alert('Changed city!');
-}
-
-function changing_address() {
-    alert('Changing address!');
-}

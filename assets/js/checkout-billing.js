@@ -1,6 +1,6 @@
 /**
  * Javascript source file
- * @file        checkout.js
+ * @file        checkout-billing.js
  * @description
  *
  * @package     Wordpress.local
@@ -11,13 +11,10 @@
  * @link        http://pshentsoff.ru Author's homepage
  * @link        http://blog.pshentsoff.ru Author's blog
  *
- * @created     22.10.14
+ * @created     21.10.14
  */
 
-function changing_city() {
-    alert('Changed city!');
-}
-
-function changing_address() {
-    alert('Changing address!');
-}
+jQuery(function($) {
+    $("#billing_city").on('input', changing_city());
+//    $("#billing_address_1").change = changing_address();
+});
