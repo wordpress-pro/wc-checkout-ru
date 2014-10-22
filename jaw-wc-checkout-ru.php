@@ -278,7 +278,9 @@ function jaw_wc_checkout_ru_get_template($located, $template_name, $args) {
       $located = __DIR__.'/templates/'.$template_name;
     }
   } else {
-    if($template_name == 'checkout/form-checkout.php' || $template_name == 'checkout/form-shipping.php') {
+    if($template_name == 'checkout/form-checkout.php'
+      || $template_name == 'checkout/form-billing.php'
+      || $template_name == 'checkout/form-shipping.php') {
       $located = __DIR__.'/templates/cop/'.$template_name;
     }
   }
