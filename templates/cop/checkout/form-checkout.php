@@ -61,5 +61,10 @@ $get_checkout_url = apply_filters( 'woocommerce_get_checkout_url', WC()->cart->g
 
 <?php
 //@debug remove later
-$wc = WC();
-echo '<pre>'.print_r($wc, true).'</pre>';
+//$wc = WC();
+//echo '<pre>'.print_r($wc, true).'</pre>';
+
+//global $wp_filter;
+//$hook = $wp_filter;
+//ksort($hook);
+//echo '<pre>'.print_r($hook, true).'</pre>';

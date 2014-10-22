@@ -15,7 +15,7 @@ CheckOut.ru plugin for WooCommerce
 
 ### Useful links:
 
-#### Version 0.0.2
+#### Version 0.0.3
 #### Last work version 0.0.0
 #### Last stable version 0.0.0
 
