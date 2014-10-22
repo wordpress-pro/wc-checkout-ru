@@ -98,6 +98,8 @@ function jaw_wc_checkout_ru_init() {
 //        $this->availability = $this->get_option( 'availability' );
 //        $this->countries    = $this->get_option( 'countries' );
 
+        $this->get_session_ticket();
+
         add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
 //        add_filter('woocommerce_checkout_fields', array($this, 'checkout_ru_fields'));
       }
@@ -188,22 +190,32 @@ function jaw_wc_checkout_ru_init() {
         // CheckOut service API key must be set (at settings on admin options page)
         if(!isset($this->api_key) || empty($this->api_key)) return false;
 
-        $tuCurl = curl_init();
-        curl_setopt($tuCurl, CURLOPT_URL, $this::TICKET_URL . $this->api_key);
-        curl_setopt($tuCurl, CURLOPT_VERBOSE, 0);
-        curl_setopt($tuCurl, CURLOPT_HEADER, 0);
-        curl_setopt($tuCurl, CURLOPT_RETURNTRANSFER, 1);
-        $tuData = curl_exec($tuCurl);
+        if(!isset($_COOKIE['jaw_wc_checkout_ru_ticket'])) {
 
-        if(curl_errno($tuCurl)){
-          echo 'Curl error: ' . curl_error($tuCurl);
-          return false;
+          $tuCurl = curl_init();
+          curl_setopt($tuCurl, CURLOPT_URL, $this::TICKET_URL . $this->api_key);
+          curl_setopt($tuCurl, CURLOPT_VERBOSE, 0);
+          curl_setopt($tuCurl, CURLOPT_HEADER, 0);
+          curl_setopt($tuCurl, CURLOPT_RETURNTRANSFER, 1);
+          $tuData = curl_exec($tuCurl);
+
+          if(curl_errno($tuCurl)){
+            echo 'Curl error: ' . curl_error($tuCurl);
+            return false;
+          }
+
+          curl_close($tuCurl);
+          $response = json_decode($tuData,true);
+
+          if(!headers_sent()) {
+            wc_setcookie('jaw_wc_checkout_ru_ticket', $response['ticket'], time() + HOUR_IN_SECONDS);
+          }
+
+          return $response['ticket'];
+        } else {
+          //@todo check if ticket is expired and refresh if need
+          return $_COOKIE['jaw_wc_checkout_ru_ticket'];
         }
-
-        curl_close($tuCurl);
-        $response = json_decode($tuData,true);
-
-        return $response["ticket"];
 
       }
 
@@ -561,12 +573,6 @@ function jaw_wc_checkout_ru_fields($checkout_fields) {
   $checkout_ru = JAW_WC_Checkout_Ru::instance();
 
   $checkout_fields['checkout_ru'] = array(
-    // Try it on hidden (may be at session?)
-    'ticket' => array(
-      'type' => 'hidden',
-      'default' => $checkout_ru->get_session_ticket(),
-    ),
-
   );
 
   return $checkout_fields;
