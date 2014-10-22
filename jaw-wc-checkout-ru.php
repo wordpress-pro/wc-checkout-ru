@@ -95,7 +95,7 @@ function jaw_wc_checkout_ru_init() {
         // Define user set variables
         $this->title = $this->get_option( 'title' );
         $this->api_key = $this->get_option('api_key');
-        $this->use_cop = $this->get_option('use_cop', true);
+        $this->use_cop = ($this->get_option('use_cop', 'yes') == 'yes');
 
 //        $this->type         = $this->get_option( 'type' );
 //        $this->fee          = $this->get_option( 'fee' );
@@ -271,8 +271,16 @@ add_filter('woocommerce_cart_totals_before_order_total', 'jaw_wc_checkout_ru_cos
  */
 function jaw_wc_checkout_ru_get_template($located, $template_name, $args) {
 
-  if($template_name == 'checkout/form-billing.php' || $template_name == 'checkout/form-shipping.php') {
-    $located = __DIR__.'/templates/'.$template_name;
+  $checkout_ru = JAW_WC_Checkout_Ru::instance();
+
+  if(!$checkout_ru->use_cop) {
+    if($template_name == 'checkout/form-billing.php' || $template_name == 'checkout/form-shipping.php') {
+      $located = __DIR__.'/templates/'.$template_name;
+    }
+  } else {
+    if($template_name == 'checkout/form-checkout.php' || $template_name == 'checkout/form-shipping.php') {
+      $located = __DIR__.'/templates/cop/'.$template_name;
+    }
   }
 
   return $located;
@@ -573,11 +581,18 @@ function jaw_wc_checkout_ru_form_field( $key, $args, $value = null ) {
  */
 function jaw_wc_checkout_ru_fields($checkout_fields) {
 
-  $wc = WC();
   $checkout_ru = JAW_WC_Checkout_Ru::instance();
 
-  $checkout_fields['checkout_ru'] = array(
-  );
+  if($checkout_ru->use_cop) {
+
+    $wc = WC();
+
+    $checkout_fields['checkout_ru'] = array(
+      'test' => array(
+        'type' => 'hidden',
+      ),
+    );
+  }
 
   return $checkout_fields;
 
