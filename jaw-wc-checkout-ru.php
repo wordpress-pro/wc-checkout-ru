@@ -540,10 +540,11 @@ function jaw_wc_checkout_ru_form_field( $key, $args, $value = null ) {
       $field .= '</p>' . $after;
 
       break;
+    case 'hidden':
+      $field = '<input type="hidden" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" value="' . esc_attr( $value ) . '" ' . implode( ' ', $custom_attributes ) . ' />';
+      break;
     default :
-
       $field = apply_filters( 'woocommerce_form_field_' . $args['type'], '', $key, $args, $value );
-
       break;
   }
 
