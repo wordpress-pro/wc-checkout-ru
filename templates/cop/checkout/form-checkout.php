@@ -32,13 +32,12 @@ $get_checkout_url = apply_filters( 'woocommerce_get_checkout_url', WC()->cart->g
 
 			<div class="col-1">
 
-				<?php do_action( 'woocommerce_checkout_billing' ); ?>
+              <?php do_action( 'woocommerce_checkout_shipping' ); ?>
 
 			</div>
 
 			<div class="col-2">
 
-				<?php do_action( 'woocommerce_checkout_shipping' ); ?>
 
 			</div>
 
@@ -54,6 +53,13 @@ $get_checkout_url = apply_filters( 'woocommerce_get_checkout_url', WC()->cart->g
 
 </form>
 
+  <script>
+    var copFormId = 'checkout';
+  </script>
+
 <?php do_action( 'woocommerce_after_checkout_form', $checkout ); ?>
 
 <?php
+//@debug remove later
+$wc = WC();
+echo '<pre>'.print_r($wc, true).'</pre>';

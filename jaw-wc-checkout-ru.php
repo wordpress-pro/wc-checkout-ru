@@ -5,7 +5,7 @@ Plugin URI: https://bitbucket.org/jaw_projects/jaw-wc-checkout-ru
 Description: Checkout.ru shipping plugin for WooCommerce
 Author: pshentsoff
 Author URI: http://pshentsoff.ru/
-Version: 0.0.1
+Version: 0.0.2
 Text Domain: jaw-wc-checkout-ru
 License: GPL version 3 or later - http://www.gnu.org/licenses/gpl-3.0.html
 */
@@ -38,7 +38,7 @@ function jaw_wc_checkout_ru_init() {
 
     class JAW_WC_Checkout_Ru extends WC_Shipping_Method {
 
-      const VERSION = '0.0.1';
+      const VERSION = '0.0.2';
       const METHOD = 'JAW_WC_Checkout_Ru';
       const TEXT_DOMAIN = 'jaw-wc-checkout-ru';
       const TICKET_URL = 'http://platform.checkout.ru/service/login/ticket/';
@@ -52,9 +52,13 @@ function jaw_wc_checkout_ru_init() {
        */
       protected static $_instance = null;
       /**
-       * @var boolean Udse CheckOut popup for checkout
+       * @var boolean Use CheckOut popup for checkout
        */
       public $use_cop;
+      /**
+       * @var boolean Is cart must send product weight to service
+       */
+      public $send_weight;
 
       /**
        * Main JAW_WC_Checkout_Ru Instance
@@ -71,14 +75,8 @@ function jaw_wc_checkout_ru_init() {
       }
 
       function __construct() {
-        $this->id = 'checkout_ru';
-
-        load_plugin_textdomain($this::TEXT_DOMAIN, false, plugin_basename(__DIR__).'/languages');
-
-        $this->method_title = __('Checkout.ru Shipping', $this::TEXT_DOMAIN);
 
         $this->init();
-
 
       }
 
@@ -87,22 +85,21 @@ function jaw_wc_checkout_ru_init() {
        */
       function init() {
 
+        $this->id = 'checkout_ru';
+
         setlocale(LC_ALL, get_locale());
+        load_plugin_textdomain($this::TEXT_DOMAIN, false, plugin_basename(__DIR__).'/languages');
+
+        $this->method_title = __('Checkout.ru Shipping', $this::TEXT_DOMAIN);
 
         $this->init_form_fields();
-        $this->init_settings();
 
         // Define user set variables
+        $this->init_settings();
         $this->title = $this->get_option( 'title' );
         $this->api_key = $this->get_option('api_key');
         $this->use_cop = ($this->get_option('use_cop', 'yes') == 'yes');
-
-//        $this->type         = $this->get_option( 'type' );
-//        $this->fee          = $this->get_option( 'fee' );
-//        $this->type         = $this->get_option( 'type' );
-//        $this->codes        = $this->get_option( 'codes' );
-//        $this->availability = $this->get_option( 'availability' );
-//        $this->countries    = $this->get_option( 'countries' );
+        $this->send_weight = ($this->get_option('send_weight', 'yes') == 'yes');
 
         $this->get_session_ticket();
 
@@ -124,7 +121,7 @@ function jaw_wc_checkout_ru_init() {
           'title' => array(
             'title'       => __( 'Title', 'woocommerce' ),
             'type'        => 'text',
-            'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
+            'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce', $this::TEXT_DOMAIN),
             'default'     => __( 'CheckOut Delivery', $this::TEXT_DOMAIN ),
             'desc_tip'    => true,
           ),
@@ -133,19 +130,23 @@ function jaw_wc_checkout_ru_init() {
             'type' => 'text',
             'label' => __('CheckOut service API key', $this::TEXT_DOMAIN),
             'default' => __('ENTER API KEY HERE', $this::TEXT_DOMAIN),
-            'description' => __('Get your API key to CheckOut service functions at service clients private area.'),
+            'description' => __('Get your API key to CheckOut service functions at service clients private area.', $this::TEXT_DOMAIN),
             'desc_tip'    => true,
           ),
           'use_cop' => array(
             'title' => __('Use CheckOut.ru popup', $this::TEXT_DOMAIN),
             'type' => 'checkbox',
-            'description' => __('Use CheckOut.ru popup form for checkout instead of native WooCommerce.'),
+            'description' => __('Use CheckOut.ru popup form for checkout instead of native WooCommerce.', $this::TEXT_DOMAIN),
             'desc_tip'    => true,
             'default' => 'on',
           ),
-
-          //@todo add other settings
-
+          'send_weight' => array(
+            'title' => __('Send weight', $this::TEXT_DOMAIN),
+            'type' => 'checkbox',
+            'description' => __('Is cart must send product weight to service CheckOut.ru.', $this::TEXT_DOMAIN),
+            'desc_tip'    => true,
+            'default' => 'off',
+          ),
         );
       }
 
@@ -274,13 +275,16 @@ function jaw_wc_checkout_ru_get_template($located, $template_name, $args) {
   $checkout_ru = JAW_WC_Checkout_Ru::instance();
 
   if(!$checkout_ru->use_cop) {
-    if($template_name == 'checkout/form-billing.php' || $template_name == 'checkout/form-shipping.php') {
+    if($template_name == 'checkout/form-billing.php'
+      || $template_name == 'checkout/form-shipping.php'
+    ) {
       $located = __DIR__.'/templates/'.$template_name;
     }
   } else {
     if($template_name == 'checkout/form-checkout.php'
       || $template_name == 'checkout/form-billing.php'
-      || $template_name == 'checkout/form-shipping.php') {
+      || $template_name == 'checkout/form-shipping.php'
+    ) {
       $located = __DIR__.'/templates/cop/'.$template_name;
     }
   }
@@ -294,7 +298,7 @@ add_filter('wc_get_template', 'jaw_wc_checkout_ru_get_template', 0, 3);
  */
 function jaw_wc_checkout_ru_enqueue_script() {
 
-  $checkout_ru = JAW_WC_Checkout_ru::instance();
+  $checkout_ru = JAW_WC_Checkout_Ru::instance();
 
   if($checkout_ru->use_cop) {
     wp_enqueue_script('jaw-wc-checkout-ru--cop', 'http://platform.checkout.ru/cop/popup.js?ver=1.0');
@@ -590,10 +594,76 @@ function jaw_wc_checkout_ru_fields($checkout_fields) {
     $wc = WC();
 
     $checkout_fields['checkout_ru'] = array(
-      'test' => array(
+      'ticket' => array(
+        'type' => 'hidden',
+        'default' => $checkout_ru->get_session_ticket(),
+      ),
+      'callbackURL' => array(
+        'type' => 'hidden',
+        'default' => site_url(), //@todo temporary
+      ),
+      'place' => $checkout_fields['shipping']['shipping_city'],
+      'street' => $checkout_fields['shipping']['billing_address_1'],
+      'house' => array(
+        'type' => 'hidden',
+      ),
+      'housing' => array(
+        'type' => 'hidden',
+      ),
+      'building' => array(
+        'type' => 'hidden',
+      ),
+      'appartment' => array(
+        'type' => 'hidden',
+      ),
+      'postindex' => array(
+        'type' => 'hidden',
+      ),
+      'fullname' => array(
+        'type' => 'hidden',
+      ),
+      'email' => array(
+        'type' => 'hidden',
+      ),
+      'phone' => array(
         'type' => 'hidden',
       ),
     );
+
+    $i = 0;
+    foreach ($wc->cart->cart_contents as $ciid => $cart_item) {
+      $checkout_fields['checkout_ru']["names[$i]"] = array(
+        'type' => 'hidden',
+        'default' => $cart_item['data']->post->post_title,
+      );
+      $checkout_fields['checkout_ru']["codes[$i]"] = array(
+        'type' => 'hidden',
+        'default' => $cart_item['product_id'],
+      );
+      $checkout_fields['checkout_ru']["varcodes[$i]"] = array(
+        'type' => 'hidden',
+        'default' => $cart_item['variation_id'],
+      );
+      $checkout_fields['checkout_ru']["quantities[$i]"] = array(
+        'type' => 'hidden',
+        'default' => $cart_item['quantity'],
+      );
+      $checkout_fields['checkout_ru']["costs[$i]"] = array(
+        'type' => 'hidden',
+        'default' => $cart_item['line_subtotal'],
+      );
+      $checkout_fields['checkout_ru']["paycosts[$i]"] = array(
+        'type' => 'hidden',
+        'default' => $cart_item['line_total'],
+      );
+      if($checkout_ru->send_weight) {
+        $checkout_fields['checkout_ru']["weights[$i]"] = array(
+          'type' => 'hidden',
+          'default' => 0, //@todo get weight data?
+        );
+      }
+    }
+
   }
 
   return $checkout_fields;

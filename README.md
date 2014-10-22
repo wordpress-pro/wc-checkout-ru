@@ -6,7 +6,7 @@ CheckOut.ru plugin for WooCommerce
 -   [Donate link](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=FGRFBSFEW5V3Y "Please, donate to support project")
 -   Tags: wordpress, plugin, woocommerce, shipping, checkout
 -   Requires at least:
--   Tested up to:
+-   Tested up to: 4.0
 -   Stable tag:
 -   Author: pshentsoff
 -   [Author's homepage](http://pshentsoff.ru "Author's homepage")
@@ -15,7 +15,7 @@ CheckOut.ru plugin for WooCommerce
 
 ### Useful links:
 
-#### Version 0.0.0
+#### Version 0.0.2
 #### Last work version 0.0.0
 #### Last stable version 0.0.0
 
