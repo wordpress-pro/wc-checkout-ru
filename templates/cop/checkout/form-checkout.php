@@ -53,18 +53,4 @@ $get_checkout_url = apply_filters( 'woocommerce_get_checkout_url', WC()->cart->g
 
 </form>
 
-  <script>
-    var copFormId = 'checkout';
-  </script>
-
 <?php do_action( 'woocommerce_after_checkout_form', $checkout ); ?>
-
-<?php
-//@debug remove later
-//$wc = WC();
-//echo '<pre>'.print_r($wc, true).'</pre>';
-
-//global $wp_filter;
-//$hook = $wp_filter;
-//ksort($hook);
-//echo '<pre>'.print_r($hook, true).'</pre>';

@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name: JAW WooCommerce CheckOut.ru
+ * Plugin Name: JAW WooCommerce CheckOut.ru Delivery
  * Plugin URI: https://bitbucket.org/jaw_projects/jaw-wc-checkout-ru
  * Description: Checkout.ru shipping plugin for WooCommerce
- * Version: 0.0.3
+ * Version: 0.1.4
  * Author: pshentsoff
  * Author URI: http://pshentsoff.ru/
  * Requires at least: 3.8
@@ -39,283 +39,11 @@
 // Exit if accessed directly
 defined('ABSPATH') or exit;
 
-function jaw_wc_checkout_ru_init() {
+define('_JAW_WC_CHECKOUT_RU_TICKET_URL', 'http://platform.checkout.ru/service/login/ticket/');
+define('_JAW_WC_CHECKOUT_RU_COP_SCRIPT_URL', 'http://platform.checkout.ru/cop/popup.js');
+define('_JAW_WC_CHECKOUT_RU_TEXT_DOMAIN', 'jaw-wc-checkout-ru');
 
-  if(!class_exists('WC_Shipping_Method')) return;
-
-  class JAW_WC_Checkout_Ru extends WC_Shipping_Method {
-
-    const VERSION = '0.0.3';
-    const METHOD = 'JAW_WC_Checkout_Ru';
-    const TEXT_DOMAIN = 'jaw-wc-checkout-ru';
-    /**
-     * URL to get session ticket
-     */
-    const TICKET_URL = 'http://platform.checkout.ru/service/login/ticket/';
-    /**
-     * URL of CO3 popup script
-     */
-    const COP_SCRIPT_URL = 'http://platform.checkout.ru/cop/popup.js';
-
-    /**
-     * @var string CheckOut service API key
-     */
-    public $api_key = '';
-    /**
-     * @var JAW_WC_Checkout_Ru The single instance of the class
-     */
-    protected static $_instance = null;
-    /**
-     * @var boolean Use CheckOut popup for checkout
-     */
-    public $use_cop;
-    /**
-     * @var boolean Is cart must send product weight to service
-     */
-    public $send_weight;
-
-    /**
-     * Main JAW_WC_Checkout_Ru Instance
-     *
-     * Ensures only one instance of JAW_WC_Checkout_Ru is loaded or can be loaded.
-     *
-     * @static
-     * @return JAW_WC_Checkout_Ru Main instance
-     */
-    public static function instance() {
-      if ( is_null( self::$_instance ) )
-        self::$_instance = new self();
-      return self::$_instance;
-    }
-
-    function __construct() {
-
-      $this->init();
-
-      add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
-//        add_filter('woocommerce_checkout_fields', array($this, 'checkout_ru_fields'));
-
-      if($this->use_cop) {
-        wp_enqueue_script('jaw-wc-checkout-ru--cop', $this::COP_SCRIPT_URL, array(), '1.0', true);
-      } else {
-        //@todo without CO3?
-//      wp_enqueue_script('jaw-wc-checkout-ru-js-checkout', plugins_url('assets/js/checkout.js', __FILE__), array('jquery', 'wc-checkout', 'woocommerce'));
-//      wp_enqueue_script('jaw-wc-checkout-ru-js-checkout-billing', plugins_url('assets/js/checkout-billing.js', __FILE__), array('jaw-wc-checkout-ru-js-checkout', 'wc-checkout', 'woocommerce'));
-//      if(!WC()->cart->ship_to_billing_address_only()) {
-//        wp_enqueue_script('jaw-wc-checkout-ru-js-checkout-shipping', plugins_url('assets/js/checkout-shipping.js', __FILE__), array('jaw-wc-checkout-ru-js-checkout'));
-//      }
-      }
-    }
-
-    /**
-     * Init settings
-     */
-    function init() {
-
-      $this->id = 'checkout_ru';
-
-      setlocale(LC_ALL, get_locale());
-      load_plugin_textdomain($this::TEXT_DOMAIN, false, plugin_basename(__DIR__).'/languages');
-
-      $this->method_title = __('Checkout.ru Shipping', $this::TEXT_DOMAIN);
-
-      $this->init_form_fields();
-
-      // Define user set variables
-      $this->init_settings();
-      $this->title = $this->get_option( 'title' );
-      $this->api_key = $this->get_option('api_key');
-      $this->use_cop = ($this->get_option('use_cop', 'yes') == 'yes');
-      $this->send_weight = ($this->get_option('send_weight', 'yes') == 'yes');
-
-      $this->get_session_ticket();
-
-    }
-
-    /**
-     * The Shipping fields
-     */
-    function init_form_fields() {
-      $this->form_fields = array(
-        'enabled' => array(
-          'title' => __('Enable', 'woocommerce'),
-          'type' => 'checkbox',
-          'label' => __('Enable Checkout.ru', $this::TEXT_DOMAIN),
-          'default' => 'no',
-        ),
-        'title' => array(
-          'title'       => __( 'Title', 'woocommerce' ),
-          'type'        => 'text',
-          'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce', $this::TEXT_DOMAIN),
-          'default'     => __( 'CheckOut Delivery', $this::TEXT_DOMAIN ),
-          'desc_tip'    => true,
-        ),
-        'api_key' => array(
-          'title' => __('API key', $this::TEXT_DOMAIN),
-          'type' => 'text',
-          'label' => __('CheckOut service API key', $this::TEXT_DOMAIN),
-          'default' => __('ENTER API KEY HERE', $this::TEXT_DOMAIN),
-          'description' => __('Get your API key to CheckOut service functions at service clients private area.', $this::TEXT_DOMAIN),
-          'desc_tip'    => true,
-        ),
-        'use_cop' => array(
-          'title' => __('Use CheckOut.ru popup', $this::TEXT_DOMAIN),
-          'type' => 'checkbox',
-          'description' => __('Use CheckOut.ru popup form for checkout instead of native WooCommerce.', $this::TEXT_DOMAIN),
-          'desc_tip'    => true,
-          'default' => 'on',
-        ),
-        'send_weight' => array(
-          'title' => __('Send weight', $this::TEXT_DOMAIN),
-          'type' => 'checkbox',
-          'description' => __('Is cart must send product weight to service CheckOut.ru.', $this::TEXT_DOMAIN),
-          'desc_tip'    => true,
-          'default' => 'off',
-        ),
-      );
-    }
-
-    /**
-     * Calculate shipping function.
-     */
-    function calculate_shipping() {
-      //@todo calc shipping cost
-      $shipping_total = 0;
-
-      $rate = array(
-        'id'    => $this->id,
-        'label' => $this->title,
-        'cost'  => $shipping_total
-      );
-
-      $this->add_rate($rate);
-
-    }
-
-    /**
-     * admin_options function. Simplest.
-     *
-     * @access public
-     * @return void
-     */
-    function admin_options() {
-      ?>
-      <h3><?php echo $this->method_title; ?></h3>
-      <p><?php _e( 'Checkout.ru shipping for delivering orders by CheckOut service.', $this::TEXT_DOMAIN ); ?></p>
-      <table class="form-table">
-        <?php $this->generate_settings_html(); ?>
-      </table> <?php
-    }
-
-    /**
-     * is_available function.
-     * @param array $package
-     * @return bool
-     */
-    function is_available( $package ) {
-
-      if ($this->enabled == 'no') return false;
-
-      return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', true, $package );
-
-    }
-
-    /**
-     * Get CheckOut service session ticket from service or cookie
-     * @return string session ticket or false on error or API key not set
-     */
-    function get_session_ticket() {
-
-      // CheckOut service API key must be set (at settings on admin options page)
-      if(!isset($this->api_key) || empty($this->api_key)) return false;
-
-      if(!isset($_COOKIE['jaw_wc_checkout_ru_ticket'])) {
-
-        $tuCurl = curl_init();
-        curl_setopt($tuCurl, CURLOPT_URL, $this::TICKET_URL . $this->api_key);
-        curl_setopt($tuCurl, CURLOPT_VERBOSE, 0);
-        curl_setopt($tuCurl, CURLOPT_HEADER, 0);
-        curl_setopt($tuCurl, CURLOPT_RETURNTRANSFER, 1);
-        $tuData = curl_exec($tuCurl);
-
-        if(curl_errno($tuCurl)){
-          echo 'Curl error: ' . curl_error($tuCurl);
-          return false;
-        }
-
-        curl_close($tuCurl);
-        $response = json_decode($tuData,true);
-
-        if(!headers_sent()) {
-          wc_setcookie('jaw_wc_checkout_ru_ticket', $response['ticket'], time() + HOUR_IN_SECONDS);
-        }
-
-        return $response['ticket'];
-      } else {
-        return $_COOKIE['jaw_wc_checkout_ru_ticket'];
-      }
-
-    }
-
-  }
-}
-add_action('woocommerce_shipping_init', 'jaw_wc_checkout_ru_init', 0);
-
-/**
- * woocommerce_shipping_methods hook function
- * @param $methods
- * @return array
- */
-function jaw_wc_checkout_ru_add_method($methods) {
-  $methods[] = JAW_WC_Checkout_Ru::METHOD;
-  return $methods;
-}
-add_filter('woocommerce_shipping_methods', 'jaw_wc_checkout_ru_add_method');
-
-/**
- * woocommerce_cart_totals_before_order_total hook function
- */
-function jaw_wc_checkout_ru_costs() {
-
-  $wc = WC();
-
-  if($wc->session->choosen_shipping_methods[0] == JAW_WC_Checkout_Ru::METHOD) {
-    //@todo check this and set
-//    $wc->shipping->shipping_total = $_SESSION['price'];
-//    $wc->cart->total = $wc->cart->subtotal + $_SESSION['price'];
-//    $wc->session->shipping_total = '10';
-//    $wc->session->total = $wc->session->subtotal + $_SESSION['price'];
-//    $wc->cart->add_fee(__('Shipping Cost', 'woocommerce'), $_SESSION['price']);
-//    $wc->session->set('shipping_total"', $_SESSION['price']);
-  }
-}
-add_filter('woocommerce_cart_totals_before_order_total', 'jaw_wc_checkout_ru_costs');
-
-/**
- * wc_get_template hook function
- */
-function jaw_wc_checkout_ru_get_template($located, $template_name, $args) {
-
-  $checkout_ru = JAW_WC_Checkout_Ru::instance();
-
-  if(!$checkout_ru->use_cop) {
-    if($template_name == 'checkout/form-billing.php'
-      || $template_name == 'checkout/form-shipping.php'
-    ) {
-      $located = __DIR__.'/templates/'.$template_name;
-    }
-  } else {
-    if($template_name == 'checkout/form-checkout.php'
-      || $template_name == 'checkout/form-billing.php'
-      || $template_name == 'checkout/form-shipping.php'
-    ) {
-      $located = __DIR__.'/templates/cop/'.$template_name;
-    }
-  }
-
-  return $located;
-}
-add_filter('wc_get_template', 'jaw_wc_checkout_ru_get_template', 0, 3);
+include('includes/class-jaw-wc-checkout-ru-checkout.php');
 
 /**
  * Outputs a checkout/address form field.
@@ -588,25 +316,29 @@ function jaw_wc_checkout_ru_form_field( $key, $args, $value = null ) {
  * @param $checkout_fields
  * @return mixed
  */
-function jaw_wc_checkout_ru_fields($checkout_fields) {
+function jaw_wc_checkout_ru_fields($checkout_fields = array()) {
 
-  $checkout_ru = JAW_WC_Checkout_Ru::instance();
+  //@fixme change this workaround to native solution
+  $settings = get_option( 'woocommerce_checkout_ru_settings', null );
+  $api_key = isset($settings['api_key']) ? $settings['api_key'] : null;
+  $use_cop = isset($settings['use_cop']) ? $settings['use_cop'] : false;
+  $send_weight = isset($settings['send_weight']) ? $settings['send_weight'] : false;
 
-  if($checkout_ru->use_cop) {
+  if($use_cop) {
 
     $wc = WC();
 
     $checkout_fields['checkout_ru'] = array(
       'ticket' => array(
         'type' => 'hidden',
-        'default' => $checkout_ru->get_session_ticket(),
+        'default' => jaw_wc_checkout_ru_get_session_ticket($api_key),
       ),
       'callbackURL' => array(
         'type' => 'hidden',
-        'default' => site_url(), //@todo temporary
+        'default' => site_url(), //@fixme temporary! Need real callbackURL
       ),
-      'place' => $checkout_fields['shipping']['shipping_city'],
-      'street' => $checkout_fields['shipping']['billing_address_1'],
+      'place' => (isset($checkout_fields['shipping']['shipping_city']) ? $checkout_fields['shipping']['shipping_city'] : array()),
+      'street' => (isset($checkout_fields['shipping']['billing_address_1']) ? $checkout_fields['shipping']['billing_address_1'] : array()),
       'house' => array(
         'type' => 'hidden',
       ),
@@ -632,6 +364,8 @@ function jaw_wc_checkout_ru_fields($checkout_fields) {
         'type' => 'hidden',
       ),
     );
+    $checkout_fields['checkout_ru']['place']['type'] = 'hidden';
+    $checkout_fields['checkout_ru']['street']['type'] = 'hidden';
 
     $i = 0;
     foreach ($wc->cart->cart_contents as $ciid => $cart_item) {
@@ -659,7 +393,7 @@ function jaw_wc_checkout_ru_fields($checkout_fields) {
         'type' => 'hidden',
         'default' => $cart_item['line_total'],
       );
-      if($checkout_ru->send_weight) {
+      if($send_weight) {
         $checkout_fields['checkout_ru']["weights[$i]"] = array(
           'type' => 'hidden',
           'default' => 0, //@todo get weight data?
@@ -673,3 +407,60 @@ function jaw_wc_checkout_ru_fields($checkout_fields) {
 
 }
 add_filter('woocommerce_checkout_fields', 'jaw_wc_checkout_ru_fields');
+
+function jaw_wc_checkout_ru_after_cart() {
+  wp_enqueue_script('jaw-wc-checkout-ru-cop', _JAW_WC_CHECKOUT_RU_COP_SCRIPT_URL, array(), '1.0', true);
+  $wc = WC();
+  $wc->cart->cop_fields = jaw_wc_checkout_ru_fields();
+}
+add_action('woocommerce_cart_collaterals', 'jaw_wc_checkout_ru_after_cart');
+
+function jaw_wc_checkout_ru_locate_template($template, $template_name, $template_path) {
+  if($template_name == 'cart/shipping-calculator.php') {
+    $template = __DIR__.'/templates/cart/shipping-calculator.php';
+  }
+  return $template;
+}
+add_filter('woocommerce_locate_template', 'jaw_wc_checkout_ru_locate_template', 0, 3);
+
+/**
+ * Get CheckOut service session ticket from service or cookie
+ * @param string CheckOut.ru service API key. Try to return cookie ticket value if set - then this parameter can bypass
+ * @return string session ticket or false on error or API key not set
+ */
+function jaw_wc_checkout_ru_get_session_ticket($api_key = null) {
+
+
+  if(!isset($_COOKIE['jaw_wc_checkout_ru_ticket'])) {
+
+    // CheckOut service API key must be set (at settings on admin options page)
+    if(!isset($api_key) || empty($api_key)) return false;
+
+    $tuCurl = curl_init();
+    curl_setopt($tuCurl, CURLOPT_URL, _JAW_WC_CHECKOUT_RU_TICKET_URL . $api_key);
+    curl_setopt($tuCurl, CURLOPT_VERBOSE, 0);
+    curl_setopt($tuCurl, CURLOPT_HEADER, 0);
+    curl_setopt($tuCurl, CURLOPT_RETURNTRANSFER, 1);
+    $tuData = curl_exec($tuCurl);
+
+    if(curl_errno($tuCurl)){
+      echo 'Curl error: ' . curl_error($tuCurl);
+      return false;
+    }
+
+    curl_close($tuCurl);
+    $response = json_decode($tuData,true);
+
+    if(!headers_sent()) {
+      wc_setcookie('jaw_wc_checkout_ru_ticket', $response['ticket'], time() + HOUR_IN_SECONDS);
+    }
+
+    return $response['ticket'];
+
+  } else {
+
+    return $_COOKIE['jaw_wc_checkout_ru_ticket'];
+
+  }
+
+}

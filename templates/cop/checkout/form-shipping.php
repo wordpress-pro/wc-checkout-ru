@@ -45,13 +45,4 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
   <?php do_action( 'woocommerce_after_order_notes', $checkout ); ?>
 
-  <?php
-  if(isset($checkout->checkout_fields['checkout_ru']) && !empty($checkout->checkout_fields['checkout_ru'])) {
-    foreach ( $checkout->checkout_fields['checkout_ru'] as $key => $field ) {
-
-      jaw_wc_checkout_ru_form_field( $key, $field, $checkout->get_value( $key ) );
-
-    }
-  }
-  ?>
 </div>
