@@ -26,7 +26,7 @@ function jaw_wc_checkout_ru_checkout_init() {
 
   class JAW_WC_Checkout_Ru_Checkout extends WC_Shipping_Method {
 
-    const VERSION = '0.1.3';
+    const VERSION = '0.1.4';
     const METHOD = 'JAW_WC_Checkout_Ru_Checkout';
     const TEXT_DOMAIN = _JAW_WC_CHECKOUT_RU_TEXT_DOMAIN;
     /**
@@ -159,17 +159,18 @@ function jaw_wc_checkout_ru_checkout_init() {
      * Calculate shipping function.
      */
     function calculate_shipping() {
-      //@todo calc shipping cost
-      $shipping_total = 0;
 
       $rate = array(
-        'id'    => $this->id,
+        'id' => $this->id,
         'label' => $this->title,
-        'cost'  => $shipping_total
-      );
+        'cost' => 0,
+        );
+
+      if($_POST['deliveryCost']) {
+        $rate['cost'] = $_POST['deliveryCost'];
+      }
 
       $this->add_rate($rate);
-
     }
 
     /**

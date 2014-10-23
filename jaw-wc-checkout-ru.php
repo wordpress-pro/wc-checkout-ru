@@ -335,7 +335,7 @@ function jaw_wc_checkout_ru_fields($checkout_fields = array()) {
       ),
       'callbackURL' => array(
         'type' => 'hidden',
-        'default' => site_url(), //@fixme temporary! Need real callbackURL
+        'default' => esc_url( $wc->cart->get_cart_url()),
       ),
       'place' => (isset($checkout_fields['shipping']['shipping_city']) ? $checkout_fields['shipping']['shipping_city'] : array()),
       'street' => (isset($checkout_fields['shipping']['billing_address_1']) ? $checkout_fields['shipping']['billing_address_1'] : array()),
@@ -415,6 +415,13 @@ function jaw_wc_checkout_ru_after_cart() {
 }
 add_action('woocommerce_cart_collaterals', 'jaw_wc_checkout_ru_after_cart');
 
+/**
+ * 'woocommerce_locate_template' hook functions to change standard woocommerce/cart/shipping-calculator
+ * @param $template
+ * @param $template_name
+ * @param $template_path
+ * @return string
+ */
 function jaw_wc_checkout_ru_locate_template($template, $template_name, $template_path) {
   if($template_name == 'cart/shipping-calculator.php') {
     $template = __DIR__.'/templates/cart/shipping-calculator.php';
@@ -464,3 +471,43 @@ function jaw_wc_checkout_ru_get_session_ticket($api_key = null) {
   }
 
 }
+
+/**
+ * 'woocommerce_cart_collaterals' hook function to check if shipping data is returned from cop
+ */
+function jaw_wc_checkout_ru_cart_collaterals() {
+  if(isset($_POST['orderId'])) {
+
+    //@todo post security check
+
+    echo '<pre>'.print_r($_POST, true).'</pre>';
+
+    $wc = WC();
+
+    $wc->cart->shipping_total = $_POST['deliveryCost'];
+    $wc->cart->total = $wc->cart->shipping_total;
+
+    $wc->session->set('shipping_total', $_POST['deliveryCost']);
+//    $wc->shipping()->shipping_total = $_POST['deliveryCost'];
+
+    if ( isset( $_POST['deliveryPostindex'] ) ) {
+      $wc->customer->set_postcode( $_POST['deliveryPostindex'] );
+    }
+    if ( isset( $_POST['deliveryPlace'] ) ) {
+      $wc->customer->set_city( $_POST['deliveryPlace'] );
+    }
+    if ( isset( $_POST['address'] ) ) {
+      $wc->customer->set_address( $_POST['address'] );
+    }
+
+    $wc->cart->calculate_totals();
+  }
+}
+add_action('woocommerce_cart_collaterals', 'jaw_wc_checkout_ru_cart_collaterals');
+
+function hide_shipping_when_free_is_available( $rates, $package ) {
+  echo '<pre>$rates = '.print_r($rates, true).'</pre>';
+//  echo '<pre>$package = '.print_r($package, true).'</pre>';
+  return $rates;
+}
+add_filter( 'woocommerce_package_rates', 'hide_shipping_when_free_is_available', 10, 2 );
