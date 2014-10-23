@@ -510,4 +510,4 @@ function hide_shipping_when_free_is_available( $rates, $package ) {
 //  echo '<pre>$package = '.print_r($package, true).'</pre>';
   return $rates;
 }
-add_filter( 'woocommerce_package_rates', 'hide_shipping_when_free_is_available', 10, 2 );
+add_filter( 'woocommerce_package_rates', 'hide_shipping_when_free_is_available', 0, 2 );

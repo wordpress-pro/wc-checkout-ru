@@ -248,6 +248,8 @@ add_filter('woocommerce_cart_totals_before_order_total', 'jaw_wc_checkout_ru_cos
  */
 function jaw_wc_checkout_ru_get_template($located, $template_name, $args) {
 
+  if(!class_exists('JAW_WC_Checkout_Ru_Checkout')) return $located;
+
   $checkout_ru = JAW_WC_Checkout_Ru_Checkout::instance();
 
   if(!$checkout_ru->use_cop) {
