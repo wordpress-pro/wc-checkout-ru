@@ -43,6 +43,7 @@ define('_JAW_WC_CHECKOUT_RU_TICKET_URL', 'http://platform.checkout.ru/service/lo
 define('_JAW_WC_CHECKOUT_RU_COP_SCRIPT_URL', 'http://platform.checkout.ru/cop/popup.js');
 define('_JAW_WC_CHECKOUT_RU_TEXT_DOMAIN', 'jaw-wc-checkout-ru');
 define('_JAW_WC_CHECKOUT_RU_METHOD_ID', 'checkout_ru');
+define('_JAW_WC_CHECKOUT_RU_PLUGIN_DIR', __DIR__);
 
 include('includes/class-jaw-wc-checkout-ru-checkout.php');
 
@@ -494,7 +495,7 @@ function jaw_wc_checkout_ru_cart_collaterals() {
 add_action('woocommerce_cart_collaterals', 'jaw_wc_checkout_ru_cart_collaterals');
 
 /**
- * 'jaw_wc_checkout_ru_cart_shipping_method_full_label' hook function
+ * 'woocommerce_cart_shipping_method_full_label' hook function
  * @param $label
  * @param $method
  * @return string

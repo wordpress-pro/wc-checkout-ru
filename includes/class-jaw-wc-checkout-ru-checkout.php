@@ -76,7 +76,7 @@ function jaw_wc_checkout_ru_checkout_init() {
       add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
 
       if($this->use_cop) {
-        wp_enqueue_script('jaw-wc-checkout-ru--cop', $this::COP_SCRIPT_URL, array(), '1.0', true);
+        wp_enqueue_script('jaw-wc-checkout-ru-cop', $this::COP_SCRIPT_URL, array(), '1.0', true);
       } else {
         //@todo without CO3?
 //      wp_enqueue_script('jaw-wc-checkout-ru-js-checkout', plugins_url('assets/js/checkout.js', __FILE__), array('jquery', 'wc-checkout', 'woocommerce'));
@@ -95,7 +95,7 @@ function jaw_wc_checkout_ru_checkout_init() {
       $this->id = _JAW_WC_CHECKOUT_RU_METHOD_ID;
 
       setlocale(LC_ALL, get_locale());
-      load_plugin_textdomain($this::TEXT_DOMAIN, false, plugin_basename(__DIR__).'/languages');
+      load_plugin_textdomain($this::TEXT_DOMAIN, false, plugin_basename(_JAW_WC_CHECKOUT_RU_PLUGIN_DIR).'/languages');
 
       $this->method_title = __('Checkout.ru Shipping', $this::TEXT_DOMAIN);
 
@@ -261,14 +261,15 @@ function jaw_wc_checkout_ru_get_template($located, $template_name, $args) {
     if($template_name == 'checkout/form-billing.php'
       || $template_name == 'checkout/form-shipping.php'
     ) {
-      $located = __DIR__.'/templates/'.$template_name;
+      $located = _JAW_WC_CHECKOUT_RU_PLUGIN_DIR.'/templates/'.$template_name;
     }
   } else {
     if($template_name == 'checkout/form-checkout.php'
       || $template_name == 'checkout/form-billing.php'
       || $template_name == 'checkout/form-shipping.php'
     ) {
-      $located = __DIR__.'/templates/cop/'.$template_name;
+      $path = explode('/',$template_name);
+      $located = _JAW_WC_CHECKOUT_RU_PLUGIN_DIR.'/templates/cop-checkout/'.$path[1];
     }
   }
 
