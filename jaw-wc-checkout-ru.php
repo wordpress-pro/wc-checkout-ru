@@ -328,6 +328,8 @@ function jaw_wc_checkout_ru_fields($checkout_fields = array()) {
 
     $wc = WC();
 
+    $address_parts = jaw_wc_checkout_ru_parse_full_address($_POST['address']);
+
     $checkout_fields['checkout_ru'] = array(
       'ticket' => array(
         'type' => 'hidden',
@@ -341,33 +343,41 @@ function jaw_wc_checkout_ru_fields($checkout_fields = array()) {
       'street' => (isset($checkout_fields['shipping']['billing_address_1']) ? $checkout_fields['shipping']['billing_address_1'] : array()),
       'house' => array(
         'type' => 'hidden',
+        'default' => (isset($address_parts['house']) ? $address_parts['house'] : ''),
       ),
       'housing' => array(
         'type' => 'hidden',
+        'default' => (isset($address_parts['housing']) ? $address_parts['housing'] : ''),
       ),
       'building' => array(
         'type' => 'hidden',
+        'default' => (isset($address_parts['building']) ? $address_parts['building'] : ''),
       ),
       'appartment' => array(
         'type' => 'hidden',
+        'default' => (isset($address_parts['apartment']) ? $address_parts['apartment'] : ''),
       ),
       'postindex' => array(
         'type' => 'hidden',
+        'default' => (isset($_POST['deliveryPostindex']) ? $_POST['deliveryPostindex'] : ''),
       ),
       'fullname' => array(
         'type' => 'hidden',
+        'default' => (isset($_POST['clientFIO']) ? $_POST['clientFIO'] : ''),
       ),
       'email' => array(
         'type' => 'hidden',
+        'default' => (isset($_POST['clientEmail']) ? $_POST['clientEmail'] : ''),
       ),
       'phone' => array(
         'type' => 'hidden',
+        'default' => (isset($_POST['clientPhone']) ? $_POST['clientPhone'] : ''),
       ),
     );
     $checkout_fields['checkout_ru']['place']['type'] = 'hidden';
-    $checkout_fields['checkout_ru']['place']['default'] = isset($_POST['place']) ? $_POST['place'] : '';
+    $checkout_fields['checkout_ru']['place']['default'] = isset($_POST['deliveryPlace']) ? $_POST['deliveryPlace'] : '';
     $checkout_fields['checkout_ru']['street']['type'] = 'hidden';
-    $checkout_fields['checkout_ru']['street']['default'] = isset($_POST['street']) ? $_POST['street'] : '';
+    $checkout_fields['checkout_ru']['street']['default'] = isset($address_parts['street']) ? $address_parts['street'] : '';
 
     $i = 0;
     foreach ($wc->cart->cart_contents as $ciid => $cart_item) {
@@ -532,7 +542,8 @@ function jaw_wc_checkout_ru_build_full_address($street, $house, $housing, $build
  */
 function jaw_wc_checkout_ru_parse_full_address($address) {
 
-  mb_internal_encoding('UTF-8');
+  $encoding = mb_regex_encoding();
+  mb_regex_encoding('UTF-8');
 
   if (!empty($address)) {
 
@@ -548,7 +559,11 @@ function jaw_wc_checkout_ru_parse_full_address($address) {
 
     $matches = array();
 
-    if (mb_eregi("д\.([а-яА-ЯёЁ0-9\-]+)(\s|$)", $addressParts[1], $matches)) $data['house'] = $matches[1];
+    if (mb_eregi("д\.([а-яА-ЯёЁ0-9\-]+)(\s|$)", $addressParts[1], $matches)) {
+      $data['house'] = $matches[1];
+    } else {
+      $data['house'] = $addressParts[1];
+    }
     if (mb_eregi("корп\.([а-яА-ЯёЁ0-9\-]+)(\s|$)", $addressParts[1], $matches)) $data['housing'] = $matches[1];
     if (mb_eregi("стр\.([а-яА-ЯёЁ0-9\-]+)(\s|$)", $addressParts[1], $matches)) $data['building'] = $matches[1];
     if (mb_eregi("кв\.([а-яА-ЯёЁ0-9\-]+)(\s|$)", $addressParts[1], $matches)) $data['apartment'] = $matches[1];
@@ -557,6 +572,7 @@ function jaw_wc_checkout_ru_parse_full_address($address) {
     $data = array(); // empty array
   }
 
+  mb_regex_encoding($encoding);
   return $data;
 
 }
