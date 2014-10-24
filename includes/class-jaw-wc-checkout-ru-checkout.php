@@ -231,15 +231,20 @@ function jaw_wc_checkout_ru_costs() {
 
   $wc = WC();
 
-  if($wc->session->choosen_shipping_methods[0] == JAW_WC_Checkout_Ru_Checkout::METHOD) {
+  if($wc->session->choosen_shipping_methods[0] == JAW_WC_Checkout_Ru_Checkout::METHOD
+    && isset($_POST['orderId'])
+    && (isset($_POST['status']) && $_POST['status'] == 'CREATED')
+  ) {
     //@todo check this and set
-//    $wc->shipping->shipping_total = $_SESSION['price'];
-//    $wc->cart->total = $wc->cart->subtotal + $_SESSION['price'];
-//    $wc->session->shipping_total = '10';
-//    $wc->session->total = $wc->session->subtotal + $_SESSION['price'];
-//    $wc->cart->add_fee(__('Shipping Cost', 'woocommerce'), $_SESSION['price']);
-//    $wc->session->set('shipping_total"', $_SESSION['price']);
+
+    $wc->shipping()->shipping_total = $_POST['deliveryCost'];
+    $wc->cart->total = $wc->cart->subtotal + $_POST['deliveryCost'];
+    $wc->session->shipping_total = $_POST['deliveryCost'];
+    $wc->session->total = $wc->session->subtotal + $_POST['deliveryCost'];
+    $wc->cart->add_fee(__('Shipping Cost', 'woocommerce'), $_POST['deliveryCost']);
+    $wc->session->set('shipping_total"', $_POST['deliveryCost']);
   }
+
 }
 add_filter('woocommerce_cart_totals_before_order_total', 'jaw_wc_checkout_ru_costs');
 

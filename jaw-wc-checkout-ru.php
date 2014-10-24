@@ -476,38 +476,20 @@ function jaw_wc_checkout_ru_get_session_ticket($api_key = null) {
  * 'woocommerce_cart_collaterals' hook function to check if shipping data is returned from cop
  */
 function jaw_wc_checkout_ru_cart_collaterals() {
-  if(isset($_POST['orderId'])) {
-
-    //@todo post security check
-
-    echo '<pre>'.print_r($_POST, true).'</pre>';
-
-    $wc = WC();
-
-    $wc->cart->shipping_total = $_POST['deliveryCost'];
-    $wc->cart->total = $wc->cart->shipping_total;
-
-    $wc->session->set('shipping_total', $_POST['deliveryCost']);
-//    $wc->shipping()->shipping_total = $_POST['deliveryCost'];
-
-    if ( isset( $_POST['deliveryPostindex'] ) ) {
-      $wc->customer->set_postcode( $_POST['deliveryPostindex'] );
-    }
-    if ( isset( $_POST['deliveryPlace'] ) ) {
-      $wc->customer->set_city( $_POST['deliveryPlace'] );
-    }
-    if ( isset( $_POST['address'] ) ) {
-      $wc->customer->set_address( $_POST['address'] );
-    }
-
-    $wc->cart->calculate_totals();
-  }
+  //@debug remove
+  echo '<pre>$_POST = '.print_r($_POST, true).'</pre>';
+  jaw_wc_checkout_ru_costs();
 }
 add_action('woocommerce_cart_collaterals', 'jaw_wc_checkout_ru_cart_collaterals');
 
-function hide_shipping_when_free_is_available( $rates, $package ) {
-  echo '<pre>$rates = '.print_r($rates, true).'</pre>';
-//  echo '<pre>$package = '.print_r($package, true).'</pre>';
-  return $rates;
+function jaw_wc_checkout_ru_cart_total($cart_total) {
+  if(isset($_POST['deliveryCost'])) {
+    if(isset($_POST['deliveryOrderCost'])) {
+      $cart_total = wc_price($_POST['deliveryOrderCost'] + $_POST['deliveryCost']);
+    } else {
+      $cart_total = wc_price($cart_total + $_POST['deliveryCost']);
+    }
+  }
+  return $cart_total;
 }
-add_filter( 'woocommerce_package_rates', 'hide_shipping_when_free_is_available', 0, 2 );
+add_filter('woocommerce_cart_total', 'jaw_wc_checkout_ru_cart_total', 0, 1);
