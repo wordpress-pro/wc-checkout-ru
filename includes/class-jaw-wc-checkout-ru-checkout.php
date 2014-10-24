@@ -166,7 +166,11 @@ function jaw_wc_checkout_ru_checkout_init() {
         'cost' => 0,
         );
 
-      if($_POST['deliveryCost']) {
+      $session_cop_fields = WC()->session->get(_JAW_WC_CHECKOUT_RU_COP_FIELDS_SESSION, array());
+
+      if(!empty($session_cop_fields) && isset($session_cop_fields['deliveryCost'])) {
+        $rate['cost'] = $session_cop_fields['deliveryCost'];
+      } elseif($_POST['deliveryCost']) {
         $rate['cost'] = $_POST['deliveryCost'];
       }
 
