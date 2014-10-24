@@ -3,7 +3,7 @@
  * Plugin Name: JAW WooCommerce CheckOut.ru Delivery
  * Plugin URI: https://bitbucket.org/jaw_projects/jaw-wc-checkout-ru
  * Description: Checkout.ru shipping plugin for WooCommerce
- * Version: 0.1.6
+ * Version: 0.1.8
  * Author: pshentsoff
  * Author URI: http://pshentsoff.ru/
  * Requires at least: 3.8
@@ -342,8 +342,14 @@ function jaw_wc_checkout_ru_fields($checkout_fields = array()) {
         'type' => 'hidden',
         'default' => esc_url( $wc->cart->get_cart_url()),
       ),
-      'place' => (isset($checkout_fields['shipping']['shipping_city']) ? $checkout_fields['shipping']['shipping_city'] : array()),
-      'street' => (isset($checkout_fields['shipping']['billing_address_1']) ? $checkout_fields['shipping']['billing_address_1'] : array()),
+      'place' => array(
+        'type' => 'hidden',
+        'default' => (isset($_POST['deliveryPlace']) ? $_POST['deliveryPlace'] : $checkout_fields['checkout_ru']['place']['default']),
+      ),
+      'street' => array(
+        'type' => 'hidden',
+        'default' => (isset($address_parts['street']) ? $address_parts['street'] : $checkout_fields['checkout_ru']['street']['default']),
+      ),
       'house' => array(
         'type' => 'hidden',
         'default' => (isset($address_parts['house']) ? $address_parts['house'] : ''),
@@ -377,10 +383,6 @@ function jaw_wc_checkout_ru_fields($checkout_fields = array()) {
         'default' => (isset($_POST['clientPhone']) ? $_POST['clientPhone'] : ''),
       ),
     );
-    $checkout_fields['checkout_ru']['place']['type'] = 'hidden';
-    $checkout_fields['checkout_ru']['place']['default'] = isset($_POST['deliveryPlace']) ? $_POST['deliveryPlace'] : $checkout_fields['checkout_ru']['place']['default'];
-    $checkout_fields['checkout_ru']['street']['type'] = 'hidden';
-    $checkout_fields['checkout_ru']['street']['default'] = isset($address_parts['street']) ? $address_parts['street'] : $checkout_fields['checkout_ru']['street']['default'];
 
     $i = 0;
     foreach ($wc->cart->cart_contents as $cart_item) {

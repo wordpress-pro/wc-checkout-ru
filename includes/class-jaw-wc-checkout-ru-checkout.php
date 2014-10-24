@@ -286,7 +286,12 @@ function jaw_wc_checkout_ru_before_checkout_billing_form($checkout) {
     }
 
     if(isset($cop_fields['deliveryPlace']) && !empty($cop_fields['deliveryPlace'])) {
-      if(isset($checkout->checkout_fields['billing']['billing_city'])) $checkout->checkout_fields['billing']['billing_city']['default'] = $cop_fields['deliveryPlace'];
+      $encoding = mb_regex_encoding();
+      mb_regex_encoding('UTF-8');
+      $parts = preg_split("/[()]+/",$cop_fields['deliveryPlace']);
+      mb_regex_encoding($encoding);
+      if(isset($checkout->checkout_fields['billing']['billing_city'])) $checkout->checkout_fields['billing']['billing_city']['default'] = trim($parts[0]);
+      if(isset($checkout->checkout_fields['billing']['billing_state'])) $checkout->checkout_fields['billing']['billing_state']['default'] = trim($parts[1]);
     }
 
     if(isset($cop_fields['deliveryPostindex']) && !empty($cop_fields['deliveryPostindex'])) {
@@ -333,7 +338,12 @@ function jaw_wc_checkout_ru_before_checkout_shipping_form($checkout) {
     }
 
     if(isset($cop_fields['deliveryPlace']) && !empty($cop_fields['deliveryPlace'])) {
-      if(isset($checkout->checkout_fields['shipping']['shipping_city'])) $checkout->checkout_fields['shipping']['shipping_city']['default'] = $cop_fields['deliveryPlace'];
+      $encoding = mb_regex_encoding();
+      mb_regex_encoding('UTF-8');
+      $parts = preg_split("/[()]+/",$cop_fields['deliveryPlace']);
+      mb_regex_encoding($encoding);
+      if(isset($checkout->checkout_fields['shipping']['shipping_city'])) $checkout->checkout_fields['shipping']['shipping_city']['default'] = trim($parts[0]);
+      if(isset($checkout->checkout_fields['shipping']['shipping_state'])) $checkout->checkout_fields['shipping']['shipping_state']['default'] = trim($parts[1]);
     }
 
     if(isset($cop_fields['deliveryPostindex']) && !empty($cop_fields['deliveryPostindex'])) {
