@@ -3,7 +3,7 @@
  * Plugin Name: JAW WooCommerce CheckOut.ru Delivery
  * Plugin URI: https://bitbucket.org/jaw_projects/jaw-wc-checkout-ru
  * Description: Checkout.ru shipping plugin for WooCommerce
- * Version: 0.1.4
+ * Version: 0.1.5
  * Author: pshentsoff
  * Author URI: http://pshentsoff.ru/
  * Requires at least: 3.8
@@ -377,9 +377,9 @@ function jaw_wc_checkout_ru_fields($checkout_fields = array()) {
       ),
     );
     $checkout_fields['checkout_ru']['place']['type'] = 'hidden';
-    $checkout_fields['checkout_ru']['place']['default'] = isset($_POST['deliveryPlace']) ? $_POST['deliveryPlace'] : '';
+    $checkout_fields['checkout_ru']['place']['default'] = isset($_POST['deliveryPlace']) ? $_POST['deliveryPlace'] : $checkout_fields['checkout_ru']['place']['default'];
     $checkout_fields['checkout_ru']['street']['type'] = 'hidden';
-    $checkout_fields['checkout_ru']['street']['default'] = isset($address_parts['street']) ? $address_parts['street'] : '';
+    $checkout_fields['checkout_ru']['street']['default'] = isset($address_parts['street']) ? $address_parts['street'] : $checkout_fields['checkout_ru']['street']['default'];
 
     $i = 0;
     foreach ($wc->cart->cart_contents as $cart_item) {
