@@ -382,7 +382,7 @@ function jaw_wc_checkout_ru_fields($checkout_fields = array()) {
     $checkout_fields['checkout_ru']['street']['default'] = isset($address_parts['street']) ? $address_parts['street'] : '';
 
     $i = 0;
-    foreach ($wc->cart->cart_contents as $ciid => $cart_item) {
+    foreach ($wc->cart->cart_contents as $cart_item) {
       $checkout_fields['checkout_ru']["names[$i]"] = array(
         'type' => 'hidden',
         'default' => $cart_item['data']->post->post_title,

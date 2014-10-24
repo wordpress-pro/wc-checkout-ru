@@ -263,14 +263,6 @@ function jaw_wc_checkout_ru_get_template($located, $template_name, $args) {
     ) {
       $located = _JAW_WC_CHECKOUT_RU_PLUGIN_DIR.'/templates/'.$template_name;
     }
-  } else {
-    if($template_name == 'checkout/form-checkout.php'
-      || $template_name == 'checkout/form-billing.php'
-      || $template_name == 'checkout/form-shipping.php'
-    ) {
-      $path = explode('/',$template_name);
-      $located = _JAW_WC_CHECKOUT_RU_PLUGIN_DIR.'/templates/cop-checkout/'.$path[1];
-    }
   }
 
   return $located;
