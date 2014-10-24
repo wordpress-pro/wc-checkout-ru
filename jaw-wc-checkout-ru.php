@@ -527,9 +527,16 @@ add_action('woocommerce_cart_collaterals', 'jaw_wc_checkout_ru_cart_collaterals'
  */
 function jaw_wc_checkout_ru_cart_shipping_method_full_label($label, $method) {
 
-  if(isset($_POST['deliveryCost']) && $method->id == _JAW_WC_CHECKOUT_RU_METHOD_ID) {
-    $method->cost = $_POST['deliveryCost'];
-    $label = $method->label.': '.wc_price($method->cost);
+  $session_cop_fields = WC()->session->get(_JAW_WC_CHECKOUT_RU_COP_FIELDS_SESSION, array());
+
+  if($method->id == _JAW_WC_CHECKOUT_RU_METHOD_ID) {
+    if(isset($_POST['deliveryCost'])) {
+      $method->cost = $_POST['deliveryCost'];
+      $label = $method->label.': '.wc_price($method->cost);
+    } elseif(!empty($session_cop_fields) && isset($session_cop_fields['deliveryCost'])) {
+      $method->cost = $session_cop_fields['deliveryCost'];
+      $label = $method->label.': '.wc_price($method->cost);
+    }
   }
 
   return $label;
@@ -542,11 +549,20 @@ add_filter( 'woocommerce_cart_shipping_method_full_label',  'jaw_wc_checkout_ru_
  * @return string
  */
 function jaw_wc_checkout_ru_cart_total($cart_total) {
+
+  $session_cop_fields = WC()->session->get(_JAW_WC_CHECKOUT_RU_COP_FIELDS_SESSION, array());
+
   if(isset($_POST['deliveryCost'])) {
     if(isset($_POST['deliveryOrderCost'])) {
       $cart_total = wc_price($_POST['deliveryOrderCost'] + $_POST['deliveryCost']);
     } else {
       $cart_total = wc_price($cart_total + $_POST['deliveryCost']);
+    }
+  } elseif(!empty($session_cop_fields) && isset($session_cop_fields['deliveryCost'])) {
+    if(isset($session_cop_fields['deliveryOrderCost'])) {
+      $cart_total = wc_price($session_cop_fields['deliveryOrderCost'] + $session_cop_fields['deliveryCost']);
+    } else {
+      $cart_total = wc_price($cart_total + $session_cop_fields['deliveryCost']);
     }
   }
   return $cart_total;
