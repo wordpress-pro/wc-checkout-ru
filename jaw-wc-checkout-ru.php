@@ -44,6 +44,7 @@ define('_JAW_WC_CHECKOUT_RU_COP_SCRIPT_URL', 'http://platform.checkout.ru/cop/po
 define('_JAW_WC_CHECKOUT_RU_TEXT_DOMAIN', 'jaw-wc-checkout-ru');
 define('_JAW_WC_CHECKOUT_RU_METHOD_ID', 'checkout_ru');
 define('_JAW_WC_CHECKOUT_RU_PLUGIN_DIR', __DIR__);
+define('_JAW_WC_CHECKOUT_RU_COP_FIELDS_SESSION', 'checkout_ru_cop_fields');
 
 include('includes/class-jaw-wc-checkout-ru-checkout.php');
 
@@ -508,7 +509,7 @@ function jaw_wc_checkout_ru_cart_collaterals() {
       'comment' => (isset($_POST['comment']) ? $_POST['comment'] : ''),
       'status' => (isset($_POST['status']) ? $_POST['status'] : ''),
     );
-    WC()->session->set('checkout_ru_cop_fields', $cop_fields);
+    WC()->session->set(_JAW_WC_CHECKOUT_RU_COP_FIELDS_SESSION, $cop_fields);
   } else {
     // Get CO3 fields from cart
     WC()->cart->cop_fields = jaw_wc_checkout_ru_fields();
