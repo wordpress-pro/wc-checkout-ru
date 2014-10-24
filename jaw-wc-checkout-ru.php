@@ -3,7 +3,7 @@
  * Plugin Name: JAW WooCommerce CheckOut.ru Delivery
  * Plugin URI: https://bitbucket.org/jaw_projects/jaw-wc-checkout-ru
  * Description: Checkout.ru shipping plugin for WooCommerce
- * Version: 0.1.5
+ * Version: 0.1.6
  * Author: pshentsoff
  * Author URI: http://pshentsoff.ru/
  * Requires at least: 3.8

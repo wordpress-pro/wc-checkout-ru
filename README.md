@@ -7,7 +7,7 @@ CheckOut.ru plugin for WooCommerce
 -   Tags: wordpress, plugin, woocommerce, shipping, checkout
 -   Requires at least:
 -   Tested up to: 4.0
--   Stable tag:
+-   Stable tag: 0.1.6
 -   Author: pshentsoff
 -   [Author's homepage](http://pshentsoff.ru "Author's homepage")
 -   License: GNU/GPL3
@@ -15,10 +15,6 @@ CheckOut.ru plugin for WooCommerce
 
 ### Useful links:
 
-#### Version 0.1.5
-#### Last work version 0.0.0
-#### Last stable version 0.0.0
-
-### Versions history
-
-#### version 0.0.0
+#### Version 0.1.6
+#### Last work version 0.1.6
+#### Last stable version 0.1.6

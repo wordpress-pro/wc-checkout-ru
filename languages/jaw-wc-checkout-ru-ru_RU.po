@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: JAW-WC-Checkout-Ru\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-10-20 18:01+0500\n"
-"PO-Revision-Date: 2014-10-20 18:03+0500\n"
+"POT-Creation-Date: 2014-10-24 23:50+0500\n"
+"PO-Revision-Date: 2014-10-25 00:01+0500\n"
 "Last-Translator: Vadim Pshentsov <pshentsoff@yandex.ru>\n"
 "Language-Team: J@W Team <pshentsoff@yandex.ru>\n"
 "Language: \n"
@@ -14,34 +14,140 @@ msgstr ""
 "X-Poedit-Basepath: .\n"
 "X-Poedit-Language: Russian\n"
 "X-Poedit-Country: RUSSIAN FEDERATION\n"
+"X-Poedit-SourceCharset: utf-8\n"
 "X-Poedit-SearchPath-0: ..\n"
 
-#: ../jaw-wc-checkout-ru.php:50
+#: ../jaw-wc-checkout-ru.php:137
+#, fuzzy
+msgid "Select a country&hellip;"
+msgstr "Поиск виджетов&hellip;"
+
+#: ../jaw-wc-checkout-ru.php:144
+#, fuzzy
+msgid "Update country"
+msgstr "Ваша страна"
+
+#: ../jaw-wc-checkout-ru.php:181
+#, fuzzy
+msgid "Select a state&hellip;"
+msgstr "Поиск виджетов&hellip;"
+
+#: ../jaw-wc-checkout-ru.php:586
+msgid ", h."
+msgstr ", д."
+
+#: ../jaw-wc-checkout-ru.php:588
+#: ../includes/class-jaw-wc-checkout-ru-checkout.php:308
+#: ../includes/class-jaw-wc-checkout-ru-checkout.php:353
+msgid " housing "
+msgstr "корп."
+
+#: ../jaw-wc-checkout-ru.php:589
+#: ../includes/class-jaw-wc-checkout-ru-checkout.php:309
+#: ../includes/class-jaw-wc-checkout-ru-checkout.php:354
+msgid " building "
+msgstr "стр."
+
+#: ../jaw-wc-checkout-ru.php:590
+msgid " ap."
+msgstr "кв."
+
+#: ../templates/checkout/form-billing.php:17
+msgid "Billing &amp; Shipping"
+msgstr "Оплата и доставка"
+
+#: ../templates/checkout/form-billing.php:21
+msgid "Billing Details"
+msgstr "Детали оплаты"
+
+#: ../templates/checkout/form-billing.php:40
+msgid "Create an account?"
+msgstr "Создать учётную запись пользователя?"
+
+#: ../templates/checkout/form-billing.php:51
+msgid "Create an account by entering the information below. If you are a returning customer please login at the top of the page."
+msgstr ""
+
+#: ../templates/checkout/form-shipping.php:30
+msgid "Ship to a different address?"
+msgstr "Доставить на другой адрес?"
+
+#: ../templates/checkout/form-shipping.php:56
+#, fuzzy
+msgid "Additional Information"
+msgstr "Дополнительная информация"
+
+#: ../templates/cart/shipping-calculator.php:35
+msgid "Calculate shipping"
+msgstr "Рассчитать доставку"
+
+#: ../includes/class-jaw-wc-checkout-ru-checkout.php:100
 msgid "Checkout.ru Shipping"
 msgstr "Доставка Checkout.ru"
 
-#: ../jaw-wc-checkout-ru.php:83
+#: ../includes/class-jaw-wc-checkout-ru-checkout.php:121
 msgid "Enable"
 msgstr "Включить"
 
-#: ../jaw-wc-checkout-ru.php:85
+#: ../includes/class-jaw-wc-checkout-ru-checkout.php:123
 msgid "Enable Checkout.ru"
 msgstr "Включить Checkout.ru"
 
-#: ../jaw-wc-checkout-ru.php:89
+#: ../includes/class-jaw-wc-checkout-ru-checkout.php:127
 #, fuzzy
 msgid "Title"
 msgstr "Заголовок"
 
-#: ../jaw-wc-checkout-ru.php:91
+#: ../includes/class-jaw-wc-checkout-ru-checkout.php:129
 msgid "This controls the title which the user sees during checkout."
 msgstr "Заголовок, который увидит пользователь во время заказа."
 
-#: ../jaw-wc-checkout-ru.php:92
+#: ../includes/class-jaw-wc-checkout-ru-checkout.php:130
 msgid "CheckOut Delivery"
 msgstr "Доставка CheckOut"
 
-#: ../jaw-wc-checkout-ru.php:125
+#: ../includes/class-jaw-wc-checkout-ru-checkout.php:134
+msgid "API key"
+msgstr "Ключ API"
+
+#: ../includes/class-jaw-wc-checkout-ru-checkout.php:136
+msgid "CheckOut service API key"
+msgstr "Ключ API сервиса CheckOut"
+
+#: ../includes/class-jaw-wc-checkout-ru-checkout.php:137
+msgid "ENTER API KEY HERE"
+msgstr "ПОЖАЛУЙСТА, УКАЖИТЕ ЗДЕСЬ КЛЮЧ API"
+
+#: ../includes/class-jaw-wc-checkout-ru-checkout.php:138
+msgid "Get your API key to CheckOut service functions at service clients private area."
+msgstr "Получите ваш ключ API к функциям сервиса CheckOut в личном кабинете клиента сервиса."
+
+#: ../includes/class-jaw-wc-checkout-ru-checkout.php:142
+msgid "Use CheckOut.ru popup"
+msgstr "Использовать popup Checkout.ru"
+
+#: ../includes/class-jaw-wc-checkout-ru-checkout.php:144
+msgid "Use CheckOut.ru popup form for checkout instead of native WooCommerce."
+msgstr "Использовать popup CheckOut для выбора адреса  и данных доставки помимо (или вместо) формы WooCommerce."
+
+#: ../includes/class-jaw-wc-checkout-ru-checkout.php:149
+msgid "Send weight"
+msgstr "Отсылать вес"
+
+#: ../includes/class-jaw-wc-checkout-ru-checkout.php:151
+msgid "Is cart must send product weight to service CheckOut.ru."
+msgstr ""
+
+#: ../includes/class-jaw-wc-checkout-ru-checkout.php:185
 msgid "Checkout.ru shipping for delivering orders by CheckOut service."
 msgstr "Доставка заказов сервисом CheckOut."
+
+#: ../includes/class-jaw-wc-checkout-ru-checkout.php:244
+msgid "Shipping Cost"
+msgstr "Стоимость доставки"
+
+#: ../includes/class-jaw-wc-checkout-ru-checkout.php:310
+#: ../includes/class-jaw-wc-checkout-ru-checkout.php:355
+msgid " ap. "
+msgstr "кв."
 
