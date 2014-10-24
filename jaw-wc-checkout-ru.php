@@ -424,8 +424,7 @@ add_filter('woocommerce_checkout_fields', 'jaw_wc_checkout_ru_fields');
 
 function jaw_wc_checkout_ru_after_cart() {
   wp_enqueue_script('jaw-wc-checkout-ru-cop', _JAW_WC_CHECKOUT_RU_COP_SCRIPT_URL, array(), '1.0', true);
-  $wc = WC();
-  $wc->cart->cop_fields = jaw_wc_checkout_ru_fields();
+  WC()->cart->cop_fields = jaw_wc_checkout_ru_fields();
 }
 add_action('woocommerce_cart_collaterals', 'jaw_wc_checkout_ru_after_cart');
 
@@ -490,6 +489,32 @@ function jaw_wc_checkout_ru_get_session_ticket($api_key = null) {
  * 'woocommerce_cart_collaterals' hook function to check if shipping data is returned from cop
  */
 function jaw_wc_checkout_ru_cart_collaterals() {
+
+  if($_POST['orderId']) {
+    // Save CO3 data to session
+    $cop_fields = array(
+      'orderId' => $_POST['orderId'],
+      'deliveryId' => (isset($_POST['deliveryId']) ? $_POST['deliveryId'] : 0),
+      'deliveryType' => (isset($_POST['deliveryType']) ? $_POST['deliveryType'] : ''),
+      'deliveryCost' => (isset($_POST['deliveryCost']) ? $_POST['deliveryCost'] : 0),
+      'deliveryOrderCost' => (isset($_POST['deliveryOrderCost']) ? $_POST['deliveryOrderCost'] : 0),
+      'deliveryMinTerm' => (isset($_POST['deliveryMinTerm']) ? $_POST['deliveryMinTerm'] : 0),
+      'deliveryMaxTerm' => (isset($_POST['deliveryMaxTerm']) ? $_POST['deliveryMaxTerm'] : 0),
+      'deliveryPlace' => (isset($_POST['deliveryPlace']) ? $_POST['deliveryPlace'] : ''),
+      'deliveryPlaceId' => (isset($_POST['deliveryPlaceId']) ? $_POST['deliveryPlaceId'] : ''),
+      'deliveryPostindex' => (isset($_POST['deliveryPostindex']) ? $_POST['deliveryPostindex'] : ''),
+      'deliveryStreetId' => (isset($_POST['deliveryStreetId']) ? $_POST['deliveryStreetId'] : ''),
+      'deliveryWeight' => (isset($_POST['deliveryWeight']) ? $_POST['deliveryWeight'] : 0),
+      'address' => (isset($_POST['address']) ? $_POST['address'] : ''),
+      'clientFIO' => (isset($_POST['clientFIO']) ? $_POST['clientFIO'] : ''),
+      'clientPhone' => (isset($_POST['clientPhone']) ? $_POST['clientPhone'] : ''),
+      'clientEmail' => (isset($_POST['clientEmail']) ? $_POST['clientEmail'] : ''),
+      'comment' => (isset($_POST['comment']) ? $_POST['comment'] : ''),
+      'status' => (isset($_POST['status']) ? $_POST['status'] : ''),
+    );
+    WC()->session->set('checkout_ru_cop_fields', $cop_fields);
+  }
+
   jaw_wc_checkout_ru_costs();
 }
 add_action('woocommerce_cart_collaterals', 'jaw_wc_checkout_ru_cart_collaterals');
