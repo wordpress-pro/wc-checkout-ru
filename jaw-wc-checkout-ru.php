@@ -365,7 +365,9 @@ function jaw_wc_checkout_ru_fields($checkout_fields = array()) {
       ),
     );
     $checkout_fields['checkout_ru']['place']['type'] = 'hidden';
+    $checkout_fields['checkout_ru']['place']['default'] = isset($_POST['place']) ? $_POST['place'] : '';
     $checkout_fields['checkout_ru']['street']['type'] = 'hidden';
+    $checkout_fields['checkout_ru']['street']['default'] = isset($_POST['street']) ? $_POST['street'] : '';
 
     $i = 0;
     foreach ($wc->cart->cart_contents as $ciid => $cart_item) {
@@ -482,6 +484,11 @@ function jaw_wc_checkout_ru_cart_collaterals() {
 }
 add_action('woocommerce_cart_collaterals', 'jaw_wc_checkout_ru_cart_collaterals');
 
+/**
+ * 'woocommerce_cart_total' hook function. Correct cart total after co3 popup callback
+ * @param $cart_total
+ * @return string
+ */
 function jaw_wc_checkout_ru_cart_total($cart_total) {
   if(isset($_POST['deliveryCost'])) {
     if(isset($_POST['deliveryOrderCost'])) {
@@ -493,3 +500,63 @@ function jaw_wc_checkout_ru_cart_total($cart_total) {
   return $cart_total;
 }
 add_filter('woocommerce_cart_total', 'jaw_wc_checkout_ru_cart_total', 0, 1);
+
+/**
+ * Function to build full address string from parts
+ * @param $street
+ * @param $house
+ * @param $housing
+ * @param $building
+ * @param $apartment
+ * @return string
+ */
+function jaw_wc_checkout_ru_build_full_address($street, $house, $housing, $building, $apartment) {
+
+  $address = '';
+
+  if(!empty($street) && !empty($house)) {
+    $address = $street . __(', h.', _JAW_WC_CHECKOUT_RU_TEXT_DOMAIN) . $house;
+
+    if(!empty($housing)) $address .= __(' housing ') . $housing; // корп.
+    if (!empty($building)) $address .= __(' building ') . $building; // стр.
+    if (!empty($apartment)) $address .= __(' ap.') . $apartment; //" кв."
+  }
+
+  return $address;
+}
+
+/**
+ * Parse adsress string to associative array
+ * @param $address
+ * @return array
+ */
+function jaw_wc_checkout_ru_parse_full_address($address) {
+
+  mb_internal_encoding('UTF-8');
+
+  if (!empty($address)) {
+
+    $addressParts = explode(', ', $address);
+
+    $data = array(
+      'street' => $addressParts[0],
+      'house' => '',
+      'housing' => '',
+      'building' => '',
+      'apartment' => '',
+    );
+
+    $matches = array();
+
+    if (mb_eregi("д\.([а-яА-ЯёЁ0-9\-]+)(\s|$)", $addressParts[1], $matches)) $data['house'] = $matches[1];
+    if (mb_eregi("корп\.([а-яА-ЯёЁ0-9\-]+)(\s|$)", $addressParts[1], $matches)) $data['housing'] = $matches[1];
+    if (mb_eregi("стр\.([а-яА-ЯёЁ0-9\-]+)(\s|$)", $addressParts[1], $matches)) $data['building'] = $matches[1];
+    if (mb_eregi("кв\.([а-яА-ЯёЁ0-9\-]+)(\s|$)", $addressParts[1], $matches)) $data['apartment'] = $matches[1];
+
+  } else {
+    $data = array(); // empty array
+  }
+
+  return $data;
+
+}
