@@ -274,7 +274,9 @@ add_filter('wc_get_template', 'jaw_wc_checkout_ru_get_template', 0, 3);
  * @param $checkout
  */
 function jaw_wc_checkout_ru_before_checkout_billing_form($checkout) {
+
   $cop_fields = WC()->session->get(_JAW_WC_CHECKOUT_RU_COP_FIELDS_SESSION);
+  
   if(isset($cop_fields) && !empty($cop_fields) && $cop_fields['orderId']) {
 
     if(isset($cop_fields['clientFIO']) && !empty($cop_fields['clientFIO'])) {
@@ -311,3 +313,48 @@ function jaw_wc_checkout_ru_before_checkout_billing_form($checkout) {
   }
 }
 add_action('woocommerce_before_checkout_billing_form', 'jaw_wc_checkout_ru_before_checkout_billing_form');
+
+/**
+ * 'woocommerce_before_checkout_shipping_form' hook function
+ * @param $checkout
+ */
+function jaw_wc_checkout_ru_before_checkout_shipping_form($checkout) {
+
+  $cop_fields = WC()->session->get(_JAW_WC_CHECKOUT_RU_COP_FIELDS_SESSION);
+
+  if(isset($cop_fields) && !empty($cop_fields) && $cop_fields['orderId']) {
+
+    if(isset($cop_fields['clientFIO']) && !empty($cop_fields['clientFIO'])) {
+      $parts = explode(' ', $cop_fields['clientFIO']);
+      $checkout->checkout_fields['shipping']['shipping_first_name']['default'] = $parts[0];
+      $checkout->checkout_fields['shipping']['shipping_last_name']['default'] = $parts[1];
+    }
+
+    if(isset($cop_fields['deliveryPlace']) && !empty($cop_fields['deliveryPlace'])) {
+      $checkout->checkout_fields['shipping']['shipping_city']['default'] = $cop_fields['deliveryPlace'];
+    }
+
+    if(isset($cop_fields['deliveryPostindex']) && !empty($cop_fields['deliveryPostindex'])) {
+      $checkout->checkout_fields['shipping']['shipping_postcode']['default'] = $cop_fields['deliveryPostindex'];
+    }
+
+    if(isset($cop_fields['clientEmail']) && !empty($cop_fields['clientEmail'])) {
+      $checkout->checkout_fields['shipping']['shipping_email']['default'] = $cop_fields['clientEmail'];
+    }
+
+    if(isset($cop_fields['clientPhone']) && !empty($cop_fields['clientPhone'])) {
+      $checkout->checkout_fields['shipping']['shipping_phone']['default'] = $cop_fields['clientPhone'];
+    }
+
+    if(isset($cop_fields['address']) && !empty($cop_fields['address'])) {
+      $parts = jaw_wc_checkout_ru_parse_full_address($cop_fields['address']);
+      $checkout->checkout_fields['shipping']['shipping_address_1']['default'] = $parts['street'];
+      if(isset($parts['house']) && !empty($parts['house'])) $checkout->checkout_fields['shipping']['shipping_address_2']['default'] = $parts['house'];
+      if(isset($parts['housing']) && !empty($parts['housing'])) $checkout->checkout_fields['shipping']['shipping_address_2']['default'] .= __(' housing ').$parts['housing'];
+      if(isset($parts['building']) && !empty($parts['building'])) $checkout->checkout_fields['shipping']['shipping_address_2']['default'] .= __(' building ').$parts['building'];
+      if(isset($parts['apartment']) && !empty($parts['apartment'])) $checkout->checkout_fields['shipping']['shipping_address_2']['default'] .= __(' ap. ').$parts['apartment'];
+    }
+
+  }
+}
+add_action('woocommerce_before_checkout_shipping_form', 'jaw_wc_checkout_ru_before_checkout_shipping_form');
