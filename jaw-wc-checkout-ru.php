@@ -42,6 +42,7 @@ defined('ABSPATH') or exit;
 define('_JAW_WC_CHECKOUT_RU_TICKET_URL', 'http://platform.checkout.ru/service/login/ticket/');
 define('_JAW_WC_CHECKOUT_RU_COP_SCRIPT_URL', 'http://platform.checkout.ru/cop/popup.js');
 define('_JAW_WC_CHECKOUT_RU_TEXT_DOMAIN', 'jaw-wc-checkout-ru');
+define('_JAW_WC_CHECKOUT_RU_METHOD_ID', 'checkout_ru');
 
 include('includes/class-jaw-wc-checkout-ru-checkout.php');
 
@@ -488,11 +489,26 @@ function jaw_wc_checkout_ru_get_session_ticket($api_key = null) {
  * 'woocommerce_cart_collaterals' hook function to check if shipping data is returned from cop
  */
 function jaw_wc_checkout_ru_cart_collaterals() {
-  //@debug remove
-  echo '<pre>$_POST = '.print_r($_POST, true).'</pre>';
   jaw_wc_checkout_ru_costs();
 }
 add_action('woocommerce_cart_collaterals', 'jaw_wc_checkout_ru_cart_collaterals');
+
+/**
+ * 'jaw_wc_checkout_ru_cart_shipping_method_full_label' hook function
+ * @param $label
+ * @param $method
+ * @return string
+ */
+function jaw_wc_checkout_ru_cart_shipping_method_full_label($label, $method) {
+
+  if(isset($_POST['deliveryCost']) && $method->id == _JAW_WC_CHECKOUT_RU_METHOD_ID) {
+    $method->cost = $_POST['deliveryCost'];
+    $label = $method->label.': '.wc_price($method->cost);
+  }
+
+  return $label;
+}
+add_filter( 'woocommerce_cart_shipping_method_full_label',  'jaw_wc_checkout_ru_cart_shipping_method_full_label', 0, 2);
 
 /**
  * 'woocommerce_cart_total' hook function. Correct cart total after co3 popup callback

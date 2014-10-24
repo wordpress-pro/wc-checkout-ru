@@ -92,7 +92,7 @@ function jaw_wc_checkout_ru_checkout_init() {
      */
     function init() {
 
-      $this->id = 'checkout_ru';
+      $this->id = _JAW_WC_CHECKOUT_RU_METHOD_ID;
 
       setlocale(LC_ALL, get_locale());
       load_plugin_textdomain($this::TEXT_DOMAIN, false, plugin_basename(__DIR__).'/languages');
