@@ -422,12 +422,6 @@ function jaw_wc_checkout_ru_fields($checkout_fields = array()) {
 }
 add_filter('woocommerce_checkout_fields', 'jaw_wc_checkout_ru_fields');
 
-function jaw_wc_checkout_ru_after_cart() {
-  wp_enqueue_script('jaw-wc-checkout-ru-cop', _JAW_WC_CHECKOUT_RU_COP_SCRIPT_URL, array(), '1.0', true);
-  WC()->cart->cop_fields = jaw_wc_checkout_ru_fields();
-}
-add_action('woocommerce_cart_collaterals', 'jaw_wc_checkout_ru_after_cart');
-
 /**
  * 'woocommerce_locate_template' hook functions to change standard woocommerce/cart/shipping-calculator
  * @param $template
@@ -490,6 +484,8 @@ function jaw_wc_checkout_ru_get_session_ticket($api_key = null) {
  */
 function jaw_wc_checkout_ru_cart_collaterals() {
 
+  wp_enqueue_script('jaw-wc-checkout-ru-cop', _JAW_WC_CHECKOUT_RU_COP_SCRIPT_URL, array(), '1.0', true);
+
   if($_POST['orderId']) {
     // Save CO3 data to session
     $cop_fields = array(
@@ -513,6 +509,9 @@ function jaw_wc_checkout_ru_cart_collaterals() {
       'status' => (isset($_POST['status']) ? $_POST['status'] : ''),
     );
     WC()->session->set('checkout_ru_cop_fields', $cop_fields);
+  } else {
+    // Get CO3 fields from cart
+    WC()->cart->cop_fields = jaw_wc_checkout_ru_fields();
   }
 
   jaw_wc_checkout_ru_costs();
