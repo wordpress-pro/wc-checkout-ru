@@ -3,7 +3,7 @@
  * Plugin Name: JAW WooCommerce CheckOut.ru Delivery
  * Plugin URI: https://bitbucket.org/jaw_projects/jaw-wc-checkout-ru
  * Description: Checkout.ru shipping plugin for WooCommerce
- * Version: 0.1.9
+ * Version: 0.1.10
  * Author: pshentsoff
  * Author URI: http://pshentsoff.ru/
  * Requires at least: 3.8
@@ -544,32 +544,6 @@ function jaw_wc_checkout_ru_cart_shipping_method_full_label($label, $method) {
   return $label;
 }
 add_filter( 'woocommerce_cart_shipping_method_full_label',  'jaw_wc_checkout_ru_cart_shipping_method_full_label', 0, 2);
-
-/**
- * 'woocommerce_cart_total' hook function. Correct cart total after co3 popup callback
- * @param $cart_total
- * @return string
- */
-function jaw_wc_checkout_ru_cart_total($cart_total) {
-
-  $session_cop_fields = WC()->session->get(_JAW_WC_CHECKOUT_RU_COP_FIELDS_SESSION, array());
-
-  if(isset($_POST['deliveryCost'])) {
-    if(isset($_POST['deliveryOrderCost'])) {
-      $cart_total = wc_price($_POST['deliveryOrderCost'] + $_POST['deliveryCost']);
-    } else {
-      $cart_total = wc_price($cart_total + $_POST['deliveryCost']);
-    }
-  } elseif(!empty($session_cop_fields) && isset($session_cop_fields['deliveryCost'])) {
-    if(isset($session_cop_fields['deliveryOrderCost'])) {
-      $cart_total = wc_price($session_cop_fields['deliveryOrderCost'] + $session_cop_fields['deliveryCost']);
-    } else {
-      $cart_total = wc_price($cart_total + $session_cop_fields['deliveryCost']);
-    }
-  }
-  return $cart_total;
-}
-add_filter('woocommerce_cart_total', 'jaw_wc_checkout_ru_cart_total', 0, 1);
 
 /**
  * Function to build full address string from parts

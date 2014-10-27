@@ -26,7 +26,7 @@ function jaw_wc_checkout_ru_checkout_init() {
 
   class JAW_WC_Checkout_Ru_Checkout extends WC_Shipping_Method {
 
-    const VERSION = '0.1.4';
+    const VERSION = '0.1.5';
     const METHOD = 'JAW_WC_Checkout_Ru_Checkout';
     const TEXT_DOMAIN = _JAW_WC_CHECKOUT_RU_TEXT_DOMAIN;
     /**
@@ -164,6 +164,7 @@ function jaw_wc_checkout_ru_checkout_init() {
         'id' => $this->id,
         'label' => $this->title,
         'cost' => 0,
+        'calc_tax'  => 'per_order',
         );
 
       $session_cop_fields = WC()->session->get(_JAW_WC_CHECKOUT_RU_COP_FIELDS_SESSION, array());
@@ -234,23 +235,28 @@ add_filter('woocommerce_shipping_methods', 'jaw_wc_checkout_ru_add_method');
 function jaw_wc_checkout_ru_costs() {
 
   $wc = WC();
+  $session_cop_fields = $wc->session->get(_JAW_WC_CHECKOUT_RU_COP_FIELDS_SESSION, array());
 
-  if($wc->session->choosen_shipping_methods[0] == JAW_WC_Checkout_Ru_Checkout::METHOD
-    && isset($_POST['orderId'])
-    && (isset($_POST['status']) && $_POST['status'] == 'CREATED')
-  ) {
-    //@todo check this and set
-
-    $wc->shipping()->shipping_total = $_POST['deliveryCost'];
-    $wc->cart->total = $wc->cart->subtotal + $_POST['deliveryCost'];
-    $wc->session->shipping_total = $_POST['deliveryCost'];
-    $wc->session->total = $wc->session->subtotal + $_POST['deliveryCost'];
-    $wc->cart->add_fee(__('Shipping Cost', 'woocommerce'), $_POST['deliveryCost']);
-    $wc->session->set('shipping_total"', $_POST['deliveryCost']);
+  if($wc->session->choosen_shipping_methods[0] == JAW_WC_Checkout_Ru_Checkout::METHOD) {
+    if(isset($_POST['orderId']) && (isset($_POST['status']) && $_POST['status'] == 'CREATED')) {
+      $wc->shipping()->shipping_total = $_POST['deliveryCost'];
+      $wc->cart->total = $wc->cart->subtotal + $_POST['deliveryCost'];
+      $wc->session->shipping_total = $_POST['deliveryCost'];
+      $wc->session->total = $wc->session->subtotal + $_POST['deliveryCost'];
+      $wc->cart->add_fee(__('Shipping Cost', 'woocommerce'), $_POST['deliveryCost']);
+      $wc->session->set('shipping_total"', $_POST['deliveryCost']);
+    } elseif(isset($session_cop_fields['orderId']) && (isset($session_cop_fields['status']) && $session_cop_fields['status'] == 'CREATED')) {
+      $wc->shipping()->shipping_total = $session_cop_fields['deliveryCost'];
+      $wc->cart->total = $wc->cart->subtotal + $session_cop_fields['deliveryCost'];
+      $wc->session->shipping_total = $session_cop_fields['deliveryCost'];
+      $wc->session->total = $wc->session->subtotal + $session_cop_fields['deliveryCost'];
+      $wc->cart->add_fee(__('Shipping Cost', 'woocommerce'), $session_cop_fields['deliveryCost']);
+      $wc->session->set('shipping_total"', $session_cop_fields['deliveryCost']);
+    }
   }
 
 }
-add_filter('woocommerce_cart_totals_before_order_total', 'jaw_wc_checkout_ru_costs');
+//add_filter('woocommerce_cart_totals_before_order_total', 'jaw_wc_checkout_ru_costs');
 
 /**
  * wc_get_template hook function
