@@ -3,7 +3,7 @@
  * Plugin Name: JAW WooCommerce CheckOut.ru Delivery
  * Plugin URI: https://bitbucket.org/jaw_projects/jaw-wc-checkout-ru
  * Description: Checkout.ru shipping plugin for WooCommerce
- * Version: 0.1.10
+ * Version: 0.1.11
  * Author: pshentsoff
  * Author URI: http://pshentsoff.ru/
  * Requires at least: 3.8
@@ -404,11 +404,11 @@ function jaw_wc_checkout_ru_fields($checkout_fields = array()) {
       );
       $checkout_fields['checkout_ru']["costs[$i]"] = array(
         'type' => 'hidden',
-        'default' => $cart_item['line_subtotal'],
+        'default' => $cart_item['line_subtotal']/$cart_item['quantity'],
       );
       $checkout_fields['checkout_ru']["paycosts[$i]"] = array(
         'type' => 'hidden',
-        'default' => $cart_item['line_total'],
+        'default' => $cart_item['line_total']/$cart_item['quantity'],
       );
       if($send_weight) {
         $checkout_fields['checkout_ru']["weights[$i]"] = array(
@@ -544,6 +544,21 @@ function jaw_wc_checkout_ru_cart_shipping_method_full_label($label, $method) {
   return $label;
 }
 add_filter( 'woocommerce_cart_shipping_method_full_label',  'jaw_wc_checkout_ru_cart_shipping_method_full_label', 0, 2);
+
+function jaw_wc_checkout_ru_cart_total($cart_total) {
+
+  $session_cop_fieds = WC()->session->get(_JAW_WC_CHECKOUT_RU_COP_FIELDS_SESSION, array());
+
+
+  if(isset($_POST['orderId'])) {
+    $cart_total = wc_price(WC()->cart->subtotal + $_POST['deliveryCost']);
+  } elseif(!empty($session_cop_fieds)) {
+    $cart_total = wc_price(WC()->cart->subtotal + $session_cop_fieds['deliveryCost']);
+  }
+
+  return $cart_total;
+}
+add_filter('woocommerce_cart_total', 'jaw_wc_checkout_ru_cart_total');
 
 /**
  * Function to build full address string from parts
